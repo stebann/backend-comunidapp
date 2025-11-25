@@ -1,6 +1,5 @@
 package com.pa.comunidapp_backend.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.pa.comunidapp_backend.config.services.MapperService;
@@ -39,16 +39,24 @@ public class AuthService {
     @Autowired
     private RolRepository rolRepository;
 
-    public ResponseEntity<LoginResponseDTO> login(LoginDTO credentials) {
-        Optional<Usuario> usuario = authRepository.findByNombreUsuarioAndContrasenaAndEliminadoEnIsNull(
-                credentials.getUsuario(),
-                credentials.getContrasena());
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        if (usuario.isEmpty()) {
+    public ResponseEntity<LoginResponseDTO> login(LoginDTO credentials) {
+        // Buscar usuario por nombre de usuario
+        Optional<Usuario> usuarioOpt = authRepository.findByNombreUsuarioAndEliminadoEnIsNull(
+                credentials.getUsuario());
+
+        if (usuarioOpt.isEmpty()) {
             throw new RuntimeException("Credenciales inválidas");
         }
 
-        Usuario usuarioObj = usuario.get();
+        Usuario usuarioObj = usuarioOpt.get();
+
+        // Verificar la contraseña usando BCrypt
+        if (!passwordEncoder.matches(credentials.getContrasena(), usuarioObj.getContrasena())) {
+            throw new RuntimeException("Credenciales inválidas");
+        }
 
         // Obtener permisos del usuario
         List<String> permisos = usuarioPermisoRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioObj.getId())
@@ -109,6 +117,10 @@ public class AuthService {
 
     public ResponseEntity<Void> register(RegistroDTO user) {
         Usuario usuario = mapperService.map(user, Usuario.class);
+
+        // Encriptar la contraseña antes de guardar
+        String contrasenaEncriptada = passwordEncoder.encode(user.getContrasena());
+        usuario.setContrasena(contrasenaEncriptada);
 
         // Asignar rol "usuario" por defecto
         Rol rolUsuario = rolRepository.findByNombre("usuario")
