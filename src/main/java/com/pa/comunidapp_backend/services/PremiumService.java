@@ -1,15 +1,26 @@
 package com.pa.comunidapp_backend.services;
 
-import com.pa.comunidapp_backend.models.*;
-import com.pa.comunidapp_backend.repositories.*;
-import com.pa.comunidapp_backend.dto.SolicitudAccesoResumenDTO;
-import com.pa.comunidapp_backend.enums.EEstadoSolicitudAcceso;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Comparator;
+
+import com.pa.comunidapp_backend.dto.SolicitudAccesoResumenDTO;
+import com.pa.comunidapp_backend.enums.EEstadoSolicitudAcceso;
+import com.pa.comunidapp_backend.models.EstadoSolicitudComercio;
+import com.pa.comunidapp_backend.models.Permiso;
+import com.pa.comunidapp_backend.models.SolicitudAcceso;
+import com.pa.comunidapp_backend.models.Usuario;
+import com.pa.comunidapp_backend.models.UsuarioPermiso;
+import com.pa.comunidapp_backend.repositories.EstadoSolicitudComercioRepository;
+import com.pa.comunidapp_backend.repositories.PermisoRepository;
+import com.pa.comunidapp_backend.repositories.SolicitudAccesoRepository;
+import com.pa.comunidapp_backend.repositories.UsuarioPermisoRepository;
+import com.pa.comunidapp_backend.repositories.UsuarioRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +116,11 @@ public class PremiumService {
                         asignarPermisoPremium(solicitud.getUsuario().getId());
                 }
 
+                // Si es suspendida, revocamos los permisos PREMIUM
+                if (estadoCodigo.equals(EEstadoSolicitudAcceso.Suspendida.getCodigo())) {
+                        revocarPermisoPremium(solicitud.getUsuario().getId());
+                }
+
                 return solicitudAccesoRepository.save(solicitud);
         }
 
@@ -117,6 +133,18 @@ public class PremiumService {
 
                 asignarPermiso(usuario, "PREMIUM");
                 asignarPermiso(usuario, "GESTIONAR_COMERCIOS");
+        }
+
+        /**
+         * Revocar permisos PREMIUM de un usuario (suspender)
+         * Elimina los permisos PREMIUM y GESTIONAR_COMERCIOS
+         */
+        private void revocarPermisoPremium(Long usuarioId) {
+                Usuario usuario = usuarioRepository.findById(usuarioId)
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                revocarPermiso(usuario, "PREMIUM");
+                revocarPermiso(usuario, "GESTIONAR_COMERCIOS");
         }
 
         private void asignarPermiso(Usuario usuario, String nombrePermiso) {
@@ -137,5 +165,24 @@ public class PremiumService {
                         usuarioPermiso.setCreadoEn(LocalDateTime.now());
                         usuarioPermisoRepository.save(usuarioPermiso);
                 }
+        }
+
+        private void revocarPermiso(Usuario usuario, String nombrePermiso) {
+                // Buscar el permiso en la base de datos
+                Permiso permiso = permisoRepository.findByNombre(nombrePermiso)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Permiso " + nombrePermiso + " no existe"));
+
+                // Buscar el permiso del usuario que no esté eliminado
+                List<UsuarioPermiso> permisosUsuario = usuarioPermisoRepository
+                                .findByUsuarioIdAndEliminadoEnIsNull(usuario.getId());
+
+                permisosUsuario.stream()
+                                .filter(p -> p.getPermiso().getId().equals(permiso.getId()))
+                                .forEach(usuarioPermiso -> {
+                                        // Marcar como eliminado (soft delete)
+                                        usuarioPermiso.setEliminadoEn(LocalDateTime.now());
+                                        usuarioPermisoRepository.save(usuarioPermiso);
+                                });
         }
 }

@@ -55,11 +55,12 @@ INSERT INTO estado_transacciones (codigo, nombre, descripcion) VALUES
 (6, 'Cancelado', 'La transacción ha sido cancelada');
 
 
--- Estados de solicitud de comercio (codigo fijo: 1=Pendiente, 2=Aprobada, 3=Rechazada)
+-- Estados de solicitud de comercio (codigo fijo: 1=Pendiente, 2=Aprobada, 3=Rechazada, 4=Suspendida)
 INSERT INTO estados_solicitud_comercio (codigo, nombre, creado_en, eliminado_en) VALUES
 (1, 'PENDIENTE', NOW(), NULL),
 (2, 'APROBADA', NOW(), NULL),
-(3, 'RECHAZADA', NOW(), NULL);
+(3, 'RECHAZADA', NOW(), NULL),
+(4, 'SUSPENDIDA', NOW(), NULL);
 
 
 -- Permisos (con tipo: USUARIO o ADMIN)
