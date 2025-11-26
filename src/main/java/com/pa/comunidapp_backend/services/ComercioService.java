@@ -228,6 +228,7 @@ public class ComercioService {
                 c.getImagenes(),
                 c.getSitioWeb(),
                 c.getTieneEnvio(),
+                c.getCategoria().getId(),
                 c.getCategoria().getNombre(),
                 categoriaArticuloComercioService.obtenerCategoriasComercio(c.getId()),
                 articuloComercioService.obtenerArticulosComercio(c.getId())));

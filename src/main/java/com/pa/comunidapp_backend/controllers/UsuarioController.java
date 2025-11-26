@@ -18,6 +18,7 @@ import com.pa.comunidapp_backend.models.Usuario;
 import com.pa.comunidapp_backend.services.UsuarioService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Usuario")
@@ -26,7 +27,6 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
-
 
     @GetMapping
     public List<Usuario> getAllUsuarios() {
@@ -46,7 +46,7 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizarDatosPersonales(
             @PathVariable Long id,
-            @RequestBody UsuarioActualizarDTO usuarioActualizarDTO) {
+            @Valid @RequestBody UsuarioActualizarDTO usuarioActualizarDTO) {
         usuarioService.actualizarDatosPersonales(id, usuarioActualizarDTO);
         return ResponseEntity.ok().build();
     }

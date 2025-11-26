@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioActualizarDTO {
-    private String avatarUrl;
     private String nombreCompleto;
     private String email;
     private String direccion;

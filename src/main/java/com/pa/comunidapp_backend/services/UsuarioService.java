@@ -42,9 +42,6 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (usuarioActualizarDTO.getAvatarUrl() != null) {
-            usuario.setAvatarUrl(usuarioActualizarDTO.getAvatarUrl());
-        }
         if (usuarioActualizarDTO.getNombreCompleto() != null) {
             usuario.setNombreCompleto(usuarioActualizarDTO.getNombreCompleto());
         }

@@ -66,6 +66,23 @@ public class ComercioController {
         return ResponseEntity.ok(comercios);
     }
 
+    @PutMapping(value = "/{comercioId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> actualizarComercio(
+            @PathVariable Long comercioId,
+            @RequestParam Long usuarioId,
+            @Valid @ModelAttribute ComercioCrearDTO comercioDTO) {
+        comercioService.actualizarComercio(comercioId, usuarioId, comercioDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{comercioId}")
+    public ResponseEntity<Void> eliminarComercio(
+            @PathVariable Long comercioId,
+            @RequestParam Long usuarioId) {
+        comercioService.desactivarComercio(comercioId, usuarioId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping(value = "/crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> crearComercio(
             @RequestParam Long usuarioId,

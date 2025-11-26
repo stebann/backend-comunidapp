@@ -19,6 +19,7 @@ public class ComercioDetalleDTO {
     private List<String> imagenes;
     private String sitioWeb;
     private Boolean tieneEnvio;
+    private Long categoriaId;
     private String categoriaNombre;
     private List<CategoriaArticuloComercioResponseDTO> categorias;
     private List<ArticuloComercioResponseDTO> articulos;

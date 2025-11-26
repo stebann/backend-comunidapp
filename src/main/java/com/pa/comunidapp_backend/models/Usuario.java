@@ -40,6 +40,7 @@ public class Usuario {
 
     private String telefono;
     private String direccion;
+    @Column(length = 1000)
     private String avatarUrl;
 
     @Column(nullable = false)
