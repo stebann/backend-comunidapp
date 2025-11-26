@@ -1,6 +1,6 @@
 package com.pa.comunidapp_backend.response;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({ "prediccion", "confianzaPrediccion", "diasDesdeUltimaActividad",
+        "articulosPublicadosUltimoMes", "frecuenciaConexionSemanal", "tasaTransaccionesCompletadas" })
 public class DatosGraficoActividadDTO {
     private String prediccion;
     private Double confianzaPrediccion;
-    private Long transaccionesUltimoMes;
-    private Long diasSinActividad;
-    private Long articulosActivos;
-    private String tendencia30Dias;
-    private List<PuntoSparkLineDTO> sparkLineUltimos30;
-    private List<HeatmapMesDTO> heatmap12Meses;
+    private Long diasDesdeUltimaActividad;
+    private Long articulosPublicadosUltimoMes;
+    private Long frecuenciaConexionSemanal;
+    private Double tasaTransaccionesCompletadas;
 }

@@ -17,7 +17,6 @@ import com.pa.comunidapp_backend.enums.EEstadoSolicitud;
 import com.pa.comunidapp_backend.enums.ETipoSolicitud;
 import com.pa.comunidapp_backend.enums.ETipoTransaccion;
 import com.pa.comunidapp_backend.models.Articulo;
-import com.pa.comunidapp_backend.models.Calificacion;
 import com.pa.comunidapp_backend.models.Categoria;
 import com.pa.comunidapp_backend.models.CondicionArticulo;
 import com.pa.comunidapp_backend.models.Transaccion;
@@ -38,10 +37,8 @@ import com.pa.comunidapp_backend.response.DatosGraficoCumplimientoDTO;
 import com.pa.comunidapp_backend.response.DatosGraficoDemandaDTO;
 import com.pa.comunidapp_backend.response.DatosGraficoExitoVentaDTO;
 import com.pa.comunidapp_backend.response.DatosGraficoTendenciaDTO;
-import com.pa.comunidapp_backend.response.DetallesConfiabilidadDTO;
 import com.pa.comunidapp_backend.response.ExitoVentaPorCategoriaDTO;
 import com.pa.comunidapp_backend.response.ExitoVentaPorCondicionDTO;
-import com.pa.comunidapp_backend.response.HeatmapMesDTO;
 import com.pa.comunidapp_backend.response.ModeloConfiabilidadUsuarioDTO;
 import com.pa.comunidapp_backend.response.ModeloCumplimientoPrestamosDTO;
 import com.pa.comunidapp_backend.response.ModeloDemandaCondicionesDTO;
@@ -51,7 +48,6 @@ import com.pa.comunidapp_backend.response.ModeloTendenciaCategoriasDTO;
 import com.pa.comunidapp_backend.response.ModelosGlobalesDTO;
 import com.pa.comunidapp_backend.response.ModelosUsuarioDTO;
 import com.pa.comunidapp_backend.response.PrediccionesResponseDTO;
-import com.pa.comunidapp_backend.response.PuntoSparkLineDTO;
 
 @Service
 @Transactional
@@ -74,6 +70,9 @@ public class PrediccionesService {
 
         @Autowired
         private CalificacionRepository calificacionRepository;
+
+        @Autowired
+        private WekaService wekaService;
 
         public PrediccionesResponseDTO obtenerPrediccionesCompletas(Long usuarioId) {
                 PrediccionesResponseDTO response = new PrediccionesResponseDTO();
@@ -422,112 +421,107 @@ public class PrediccionesService {
                 return modelo;
         }
 
-        // MODELO 5: Confiabilidad del Usuario
+        // MODELO 5: Potencial de Ventas del Usuario (usando Weka)
         private ModeloConfiabilidadUsuarioDTO calcularModeloConfiabilidadUsuario(Long usuarioId) {
                 Usuario usuario = usuarioRepository.findByIdAndEliminadoEnIsNull(usuarioId)
                                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-                List<Transaccion> transaccionesPropietario = misGestionesRepository
-                                .findByUsuarioPropietarioIdAndEliminadoEnIsNull(usuarioId);
-                List<Transaccion> transaccionesSolicitante = misGestionesRepository
-                                .findByUsuarioSolicitanteIdAndEliminadoEnIsNull(usuarioId);
-
-                long transaccionesTotales = transaccionesPropietario.size() + transaccionesSolicitante.size();
-                long transaccionesCompletadas = transaccionesPropietario.stream()
-                                .filter(t -> t.getEstadoCodigo().equals(EEstadoSolicitud.Devuelto.getCodigo()))
-                                .count()
-                                + transaccionesSolicitante.stream()
-                                                .filter(t -> t.getEstadoCodigo()
-                                                                .equals(EEstadoSolicitud.Devuelto.getCodigo()))
-                                                .count();
-
-                double tasaCumplimiento = transaccionesTotales > 0
-                                ? (transaccionesCompletadas * 100.0 / transaccionesTotales)
-                                : 0;
-
-                // Préstamos a tiempo
-                long prestamosATiempo = transaccionesPropietario.stream()
-                                .filter(t -> t.getTipoCodigo() != null &&
-                                                t.getTipoCodigo().equals(ETipoSolicitud.Prestamo.getCodigo()) &&
-                                                t.getFechaEstimadaDevolucion() != null &&
-                                                t.getRespondidoEn() != null &&
-                                                !t.getRespondidoEn().isAfter(t.getFechaEstimadaDevolucion()) &&
-                                                t.getEstadoCodigo().equals(EEstadoSolicitud.Devuelto.getCodigo()))
+                // Datos para el modelo de potencial de ventas
+                // 1. Cantidad de artículos activos
+                long cantidadArticulosActivos = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId)
+                                .stream()
+                                .filter(a -> a.getEstadoArticuloCodigo() != null &&
+                                                a.getEstadoArticuloCodigo()
+                                                                .equals(EEstadoArticulo.Disponible.getCodigo())
+                                                &&
+                                                a.getTipoTransaccionCodigo() != null &&
+                                                a.getTipoTransaccionCodigo()
+                                                                .equals(ETipoTransaccion.Venta.getCodigo()))
                                 .count();
 
-                long transaccionesRetrasadas = transaccionesPropietario.stream()
-                                .filter(t -> t.getFechaEstimadaDevolucion() != null &&
-                                                t.getRespondidoEn() != null &&
-                                                t.getRespondidoEn().isAfter(t.getFechaEstimadaDevolucion()))
-                                .count();
+                // 2. Velocidad de venta promedio (días promedio para vender un artículo)
+                List<Articulo> articulosVendidos = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId)
+                                .stream()
+                                .filter(a -> a.getTipoTransaccionCodigo() != null &&
+                                                a.getTipoTransaccionCodigo()
+                                                                .equals(ETipoTransaccion.Venta.getCodigo())
+                                                &&
+                                                esArticuloVendido(a.getId()))
+                                .collect(Collectors.toList());
 
-                // Calificaciones
-                List<Calificacion> calificaciones = calificacionRepository
-                                .findByUsuarioCalificadoIdAndEliminadoEnIsNull(usuarioId);
-                double calificacionesPromedio = calificaciones.stream()
-                                .mapToInt(Calificacion::getPuntuacion)
+                double velocidadVentaPromedio = 0.0;
+                if (!articulosVendidos.isEmpty()) {
+                        double sumaDias = articulosVendidos.stream()
+                                        .mapToDouble(a -> {
+                                                if (a.getCreadoEn() == null)
+                                                        return 0;
+                                                List<Transaccion> trans = misGestionesRepository
+                                                                .findByArticuloIdAndEliminadoEnIsNull(a.getId());
+                                                LocalDateTime fechaVenta = trans.stream()
+                                                                .filter(t -> t.getEstadoCodigo().equals(
+                                                                                EEstadoSolicitud.Aceptada.getCodigo())
+                                                                                ||
+                                                                                t.getEstadoCodigo().equals(
+                                                                                                EEstadoSolicitud.Devuelto
+                                                                                                                .getCodigo()))
+                                                                .map(Transaccion::getCreadoEn)
+                                                                .min(LocalDateTime::compareTo)
+                                                                .orElse(a.getCreadoEn());
+                                                return ChronoUnit.DAYS.between(a.getCreadoEn(), fechaVenta);
+                                        })
+                                        .sum();
+                        velocidadVentaPromedio = sumaDias / articulosVendidos.size();
+                }
+
+                // 3. Calificación promedio de ventas (rating promedio del usuario)
+                double calificacionPromedioVentas = usuario.getRatingPromedio() != null
+                                ? usuario.getRatingPromedio().doubleValue()
+                                : 5.0;
+
+                // 4. Precio promedio de artículos
+                List<Articulo> articulosVenta = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId)
+                                .stream()
+                                .filter(a -> a.getTipoTransaccionCodigo() != null &&
+                                                a.getTipoTransaccionCodigo()
+                                                                .equals(ETipoTransaccion.Venta.getCodigo())
+                                                &&
+                                                a.getPrecio() != null)
+                                .collect(Collectors.toList());
+
+                double precioPromedioArticulos = articulosVenta.stream()
+                                .mapToDouble(a -> a.getPrecio().doubleValue())
                                 .average()
                                 .orElse(0.0);
 
-                // Días de antigüedad
-                long diasAntiguedad = usuario.getCreadoEn() != null
-                                ? ChronoUnit.DAYS.between(usuario.getCreadoEn(), LocalDateTime.now())
-                                : 0;
+                // Usar modelo de Weka para predecir potencial de ventas
+                String potencialVentasWeka = wekaService.predecirPotencialVentas(
+                                cantidadArticulosActivos,
+                                velocidadVentaPromedio,
+                                calificacionPromedioVentas,
+                                precioPromedioArticulos);
 
-                // Calcular score de confiabilidad (0-100)
-                int score = calcularScoreConfiabilidad(
-                                usuario.getRatingPromedio() != null ? usuario.getRatingPromedio().doubleValue() : 5.0,
-                                transaccionesTotales,
-                                tasaCumplimiento,
-                                diasAntiguedad,
-                                calificacionesPromedio);
+                // Obtener distribución de probabilidades
+                double[] distribucionPotencial = wekaService.obtenerDistribucionPotencialVentas(
+                                cantidadArticulosActivos,
+                                velocidadVentaPromedio,
+                                calificacionPromedioVentas,
+                                precioPromedioArticulos);
 
-                String categoriaConfiabilidad;
-                if (score >= 80) {
-                        categoriaConfiabilidad = "CONFIABLE";
-                } else if (score >= 60) {
-                        categoriaConfiabilidad = "MODERADO";
-                } else {
-                        categoriaConfiabilidad = "BAJO";
-                }
+                // Calcular confianza basada en la distribución
+                double confianzaPotencial = Math.max(distribucionPotencial[0], distribucionPotencial[1]);
 
-                // Percentil comparativo (simplificado)
-                int percentil = calcularPercentil(score);
-                String descripcionPercentil = "Top " + (100 - percentil) + "% de usuarios más confiables";
-
-                // Tendencia
-                String tendencia = calcularTendenciaUsuario(usuarioId);
-
-                DetallesConfiabilidadDTO detalles = new DetallesConfiabilidadDTO();
-                detalles.setRatingPromedio(
-                                usuario.getRatingPromedio() != null ? usuario.getRatingPromedio().doubleValue() : 5.0);
-                detalles.setTransaccionesTotales(transaccionesTotales);
-                detalles.setTransaccionesCompletadas(transaccionesCompletadas);
-                detalles.setTasaCumplimiento(tasaCumplimiento);
-                detalles.setPrestamosATiempo(prestamosATiempo);
-                detalles.setTransaccionesRetrasadas(transaccionesRetrasadas);
-                detalles.setDiasAntiguedad(diasAntiguedad);
-                detalles.setCalificacionesPromedio(calificacionesPromedio);
-                detalles.setTendencia(tendencia);
-
-                ComponentesScoreDTO componentes = calcularComponentesScore(
-                                usuario.getRatingPromedio() != null ? usuario.getRatingPromedio().doubleValue() : 5.0,
-                                transaccionesTotales,
-                                tasaCumplimiento,
-                                diasAntiguedad,
-                                calificacionesPromedio);
-
+                // Datos de Weka + datos de entrada
                 DatosGraficoConfiabilidadDTO datosGrafico = new DatosGraficoConfiabilidadDTO();
-                datosGrafico.setConfiabilidadScore(score);
-                datosGrafico.setCategoriaConfiabilidad(categoriaConfiabilidad);
-                datosGrafico.setPercentilComparativo(percentil);
-                datosGrafico.setDescripcionPercentil(descripcionPercentil);
-                datosGrafico.setDetalles(detalles);
-                datosGrafico.setComponentesScore(componentes);
+                datosGrafico.setCategoriaConfiabilidad(potencialVentasWeka);
+                datosGrafico.setConfiabilidadScore((int) (confianzaPotencial * 100));
+                datosGrafico.setCantidadArticulosActivos(cantidadArticulosActivos);
+                datosGrafico.setVelocidadVentaPromedio(velocidadVentaPromedio);
+                datosGrafico.setCalificacionPromedioVentas(calificacionPromedioVentas);
+                datosGrafico.setPrecioPromedioArticulos(precioPromedioArticulos);
 
                 ModeloConfiabilidadUsuarioDTO modelo = new ModeloConfiabilidadUsuarioDTO();
-                modelo.setNombre("Confiabilidad del Usuario");
-                modelo.setDescripcion("Puntuación de confiabilidad basada en historial y comportamiento");
+                modelo.setNombre("Potencial de Ventas del Usuario");
+                modelo.setDescripcion("Predicción de potencial de ventas basada en análisis predictivo");
                 modelo.setUsuarioId(usuarioId);
                 modelo.setUsuarioNombre(usuario.getNombreCompleto());
                 modelo.setGraficoTipo("score_card");
@@ -615,18 +609,9 @@ public class PrediccionesService {
 
                 LocalDateTime ahora = LocalDateTime.now();
                 LocalDateTime hace30Dias = ahora.minusDays(30);
+                LocalDateTime hace7Dias = ahora.minusDays(7);
 
-                // Transacciones último mes
-                long transaccionesUltimoMes = misGestionesRepository.findAll().stream()
-                                .filter(t -> t.getEliminadoEn() == null &&
-                                                (t.getUsuarioPropietarioId().equals(usuarioId) ||
-                                                                t.getUsuarioSolicitanteId().equals(usuarioId))
-                                                &&
-                                                t.getCreadoEn() != null &&
-                                                t.getCreadoEn().isAfter(hace30Dias))
-                                .count();
-
-                // Días sin actividad
+                // Días desde última actividad
                 List<Transaccion> ultimasTransacciones = misGestionesRepository.findAll().stream()
                                 .filter(t -> t.getEliminadoEn() == null &&
                                                 (t.getUsuarioPropietarioId().equals(usuarioId) ||
@@ -637,111 +622,81 @@ public class PrediccionesService {
                                 .limit(1)
                                 .collect(Collectors.toList());
 
-                long diasSinActividad = 0;
+                long diasDesdeUltimaActividad = 0;
                 if (!ultimasTransacciones.isEmpty()) {
-                        diasSinActividad = ChronoUnit.DAYS.between(ultimasTransacciones.get(0).getCreadoEn(), ahora);
+                        diasDesdeUltimaActividad = ChronoUnit.DAYS.between(ultimasTransacciones.get(0).getCreadoEn(),
+                                        ahora);
+                } else {
+                        // Si no hay transacciones, usar días desde creación del usuario
+                        diasDesdeUltimaActividad = usuario.getCreadoEn() != null
+                                        ? ChronoUnit.DAYS.between(usuario.getCreadoEn(), ahora)
+                                        : 999;
                 }
 
-                // Artículos activos
-                long articulosActivos = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId)
+                // Artículos publicados último mes
+                long articulosPublicadosUltimoMes = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId)
                                 .stream()
-                                .filter(a -> a.getEstadoArticuloCodigo() != null &&
-                                                a.getEstadoArticuloCodigo()
-                                                                .equals(EEstadoArticulo.Disponible.getCodigo()))
+                                .filter(a -> a.getCreadoEn() != null && a.getCreadoEn().isAfter(hace30Dias))
                                 .count();
 
-                // Spark line últimos 30 días
-                List<PuntoSparkLineDTO> sparkLine = new ArrayList<>();
-                for (int i = 29; i >= 0; i--) {
-                        LocalDateTime dia = ahora.minusDays(i);
-                        LocalDateTime inicioDia = dia.withHour(0).withMinute(0).withSecond(0);
-                        LocalDateTime finDia = dia.withHour(23).withMinute(59).withSecond(59);
+                // Frecuencia de conexión semanal (transacciones en los últimos 7 días)
+                long frecuenciaConexionSemanal = misGestionesRepository.findAll().stream()
+                                .filter(t -> t.getEliminadoEn() == null &&
+                                                (t.getUsuarioPropietarioId().equals(usuarioId) ||
+                                                                t.getUsuarioSolicitanteId().equals(usuarioId))
+                                                &&
+                                                t.getCreadoEn() != null &&
+                                                t.getCreadoEn().isAfter(hace7Dias))
+                                .count();
 
-                        long actividad = misGestionesRepository.findAll().stream()
-                                        .filter(t -> t.getEliminadoEn() == null &&
-                                                        (t.getUsuarioPropietarioId().equals(usuarioId) ||
-                                                                        t.getUsuarioSolicitanteId().equals(usuarioId))
-                                                        &&
-                                                        t.getCreadoEn() != null &&
-                                                        t.getCreadoEn().isAfter(inicioDia) &&
-                                                        t.getCreadoEn().isBefore(finDia))
-                                        .count();
+                // Tasa de transacciones completadas
+                List<Transaccion> todasTransacciones = misGestionesRepository.findAll().stream()
+                                .filter(t -> t.getEliminadoEn() == null &&
+                                                (t.getUsuarioPropietarioId().equals(usuarioId) ||
+                                                                t.getUsuarioSolicitanteId().equals(usuarioId)))
+                                .collect(Collectors.toList());
 
-                        PuntoSparkLineDTO punto = new PuntoSparkLineDTO();
-                        punto.setDia(30 - i);
-                        punto.setActividad((int) actividad);
-                        sparkLine.add(punto);
-                }
+                long transaccionesCompletadas = todasTransacciones.stream()
+                                .filter(t -> t.getEstadoCodigo() != null &&
+                                                (t.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo()) ||
+                                                                t.getEstadoCodigo()
+                                                                                .equals(EEstadoSolicitud.Devuelto
+                                                                                                .getCodigo())))
+                                .count();
 
-                // Heatmap 12 meses
-                List<HeatmapMesDTO> heatmap = new ArrayList<>();
-                String[] meses = { "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre" };
+                double tasaTransaccionesCompletadas = todasTransacciones.size() > 0
+                                ? (transaccionesCompletadas * 1.0 / todasTransacciones.size())
+                                : 0.0;
 
-                for (int i = 11; i >= 0; i--) {
-                        LocalDateTime inicioMes = ahora.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0)
-                                        .withSecond(0);
-                        LocalDateTime finMes = inicioMes.plusMonths(1);
+                // Usar modelo de Weka para predecir
+                String prediccionWeka = wekaService.predecirActividadFutura(
+                                diasDesdeUltimaActividad,
+                                articulosPublicadosUltimoMes,
+                                frecuenciaConexionSemanal,
+                                tasaTransaccionesCompletadas);
 
-                        long actividadMes = misGestionesRepository.findAll().stream()
-                                        .filter(t -> t.getEliminadoEn() == null &&
-                                                        (t.getUsuarioPropietarioId().equals(usuarioId) ||
-                                                                        t.getUsuarioSolicitanteId().equals(usuarioId))
-                                                        &&
-                                                        t.getCreadoEn() != null &&
-                                                        t.getCreadoEn().isAfter(inicioMes) &&
-                                                        t.getCreadoEn().isBefore(finMes))
-                                        .count();
+                // Obtener distribución de probabilidades
+                double[] distribucion = wekaService.obtenerDistribucionActividadFutura(
+                                diasDesdeUltimaActividad,
+                                articulosPublicadosUltimoMes,
+                                frecuenciaConexionSemanal,
+                                tasaTransaccionesCompletadas);
 
-                        String intensidad;
-                        if (actividadMes >= 10) {
-                                intensidad = "alta";
-                        } else if (actividadMes >= 5) {
-                                intensidad = "media";
-                        } else {
-                                intensidad = "baja";
-                        }
+                // Calcular confianza basada en la distribución
+                double confianza = Math.max(distribucion[0], distribucion[1]);
 
-                        HeatmapMesDTO mes = new HeatmapMesDTO();
-                        mes.setMes(meses[inicioMes.getMonthValue() - 1]);
-                        mes.setActividadPromedio((int) actividadMes);
-                        mes.setIntensidad(intensidad);
-                        heatmap.add(mes);
-                }
-
-                // Predicción
-                String prediccion;
-                double confianza;
-                if (transaccionesUltimoMes >= 3 && diasSinActividad < 7) {
-                        prediccion = "ACTIVO";
-                        confianza = 0.9;
-                } else if (transaccionesUltimoMes >= 1 && diasSinActividad < 14) {
-                        prediccion = "ACTIVO";
-                        confianza = 0.7;
-                } else if (diasSinActividad < 30) {
-                        prediccion = "ACTIVO";
-                        confianza = 0.5;
-                } else {
-                        prediccion = "INACTIVO";
-                        confianza = 0.8;
-                }
-
-                // Tendencia 30 días
-                String tendencia30Dias = calcularTendenciaUsuario(usuarioId);
-
+                // Datos de Weka + datos de entrada
                 DatosGraficoActividadDTO datosGrafico = new DatosGraficoActividadDTO();
-                datosGrafico.setPrediccion(prediccion);
+                datosGrafico.setPrediccion(prediccionWeka);
                 datosGrafico.setConfianzaPrediccion(confianza);
-                datosGrafico.setTransaccionesUltimoMes(transaccionesUltimoMes);
-                datosGrafico.setDiasSinActividad(diasSinActividad);
-                datosGrafico.setArticulosActivos(articulosActivos);
-                datosGrafico.setTendencia30Dias(tendencia30Dias);
-                datosGrafico.setSparkLineUltimos30(sparkLine);
-                datosGrafico.setHeatmap12Meses(heatmap);
+                datosGrafico.setDiasDesdeUltimaActividad(diasDesdeUltimaActividad);
+                datosGrafico.setArticulosPublicadosUltimoMes(articulosPublicadosUltimoMes);
+                datosGrafico.setFrecuenciaConexionSemanal(frecuenciaConexionSemanal);
+                datosGrafico.setTasaTransaccionesCompletadas(tasaTransaccionesCompletadas);
 
                 ModeloInactividadUsuarioDTO modelo = new ModeloInactividadUsuarioDTO();
                 modelo.setNombre("Predicción de Actividad");
-                modelo.setDescripcion("Predicción de si el usuario seguirá activo en los próximos 30 días");
+                modelo.setDescripcion("Predicción de actividad futura basada en análisis predictivo");
                 modelo.setUsuarioId(usuarioId);
                 modelo.setUsuarioNombre(usuario.getNombreCompleto());
                 modelo.setGraficoTipo("spark_line_heatmap");

@@ -1,0 +1,125 @@
+{
+  "timestamp": "2024-12-19T10:30:00",
+  "modelosGlobales": {
+    "modelo1ExitoVenta": {
+      "nombre": "Éxito de Venta de Artículos",
+      "descripcion": "Análisis de qué artículos se venden según condición, categoría y precio",
+      "tasaExitoGeneral": 65.5,
+      "graficoTipo": "funnel",
+      "datosGrafico": {
+        "porCategoria": [
+          {
+            "categoriaCodigo": 1,
+            "categoriaNombre": "Electrónica",
+            "tasaExito": 78.5,
+            "cantidadArticulos": 120,
+            "cantidadVendidos": 94
+          }
+        ],
+        "porCondicion": [
+          {
+            "condicionCodigo": 1,
+            "condicionNombre": "Nuevo",
+            "tasaExito": 85.2,
+            "cantidadArticulos": 200,
+            "cantidadVendidos": 170
+          }
+        ]
+      }
+    },
+    "modelo2CumplimientoPrestamos": {
+      "nombre": "Cumplimiento en Préstamos",
+      "descripcion": "Predicción de incumplimiento y retrasos en devoluciones",
+      "tasaCumplimiento": 82.3,
+      "graficoTipo": "gauge",
+      "datosGrafico": {
+        "tasaCumplimientoPorcentaje": 82.3,
+        "tasaRetrasoPorcentaje": 12.5,
+        "prestamosTotales": 150,
+        "prestamosCumplidos": 123,
+        "prestamosRetrasados": 19,
+        "retrasoPromedioDias": 3.2,
+        "color": "#4CAF50"
+      }
+    },
+    "modelo3TendenciaCategorias": {
+      "nombre": "Tendencia por Categoría",
+      "descripcion": "Identificar categorías en crecimiento, estables o en declive",
+      "graficoTipo": "line_chart",
+      "datosGrafico": {
+        "categorias": [
+          {
+            "categoriaCodigo": 1,
+            "categoriaNombre": "Electrónica",
+            "tendencia": "ALCISTA",
+            "variacionPorcentaje": 15.5,
+            "datosMensual": [
+              {
+                "mes": "octubre",
+                "tasaVenta": 65.2
+              },
+              {
+                "mes": "noviembre",
+                "tasaVenta": 72.1
+              },
+              {
+                "mes": "diciembre",
+                "tasaVenta": 75.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modelo4DemandaCondiciones": {
+      "nombre": "Demanda por Condición del Artículo",
+      "descripcion": "Impacto de la condición del artículo en la conversión de venta",
+      "graficoTipo": "radar",
+      "datosGrafico": {
+        "condiciones": [
+          {
+            "condicionCodigo": 1,
+            "condicionNombre": "Nuevo",
+            "nivelDemanda": "ALTA",
+            "tasaVenta": 85.2,
+            "precioPromedio": 450000.0,
+            "diasVentaPromedio": 12.5
+          }
+        ]
+      }
+    }
+  },
+  "modelosUsuario": {
+    "modelo5ConfiabilidadUsuario": {
+      "nombre": "Potencial de Ventas del Usuario",
+      "descripcion": "Predicción de potencial de ventas basada en análisis predictivo",
+      "usuarioId": 1,
+      "usuarioNombre": "Juan Pérez",
+      "graficoTipo": "score_card",
+      "datosGrafico": {
+        "categoriaConfiabilidad": "ALTO_POTENCIAL",
+        "confiabilidadScore": 87,
+        "cantidadArticulosActivos": 5,
+        "velocidadVentaPromedio": 12.5,
+        "calificacionPromedioVentas": 4.8,
+        "precioPromedioArticulos": 450000.0
+      }
+    },
+    "modelo6InactividadUsuario": {
+      "nombre": "Predicción de Actividad",
+      "descripcion": "Predicción de actividad futura basada en análisis predictivo",
+      "usuarioId": 1,
+      "usuarioNombre": "Juan Pérez",
+      "graficoTipo": "spark_line_heatmap",
+      "datosGrafico": {
+        "prediccion": "ACTIVO",
+        "confianzaPrediccion": 0.92,
+        "diasDesdeUltimaActividad": 2,
+        "articulosPublicadosUltimoMes": 3,
+        "frecuenciaConexionSemanal": 5,
+        "tasaTransaccionesCompletadas": 0.93
+      }
+    }
+  }
+}
+
