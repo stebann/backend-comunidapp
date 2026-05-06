@@ -24,6 +24,8 @@ import com.pa.comunidapp_backend.services.MisGestionesService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @RestController
 @RequestMapping("/api/mis-gestiones")
@@ -34,18 +36,23 @@ public class MisGestionesController {
     private MisGestionesService solicitudService;
 
     @PostMapping("/solicitar")
-    public ResponseEntity<Void> crearSolicitud(
+    public ResponseEntity<?> crearSolicitud(
             @Valid @RequestBody SolicitudArticuloCrearDTO solicitudDTO,
             @RequestParam Long usuarioId) {
-        solicitudService.crearSolicitud(solicitudDTO, usuarioId);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        try {
+            solicitudService.crearSolicitud(solicitudDTO, usuarioId);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @PutMapping("/estado/{solicitudId}")
     public ResponseEntity<Void> cambiarEstadoSolicitud(
             @PathVariable Long solicitudId,
             @Valid @RequestBody ActualizarEstadoTransaccionDTO actualizarDTO) {
-        solicitudService.cambiarEstadoSolicitud(solicitudId, actualizarDTO.getEstadoCodigo(), actualizarDTO.getMensajeRespuesta());
+        solicitudService.cambiarEstadoSolicitud(solicitudId, actualizarDTO.getEstadoCodigo(),
+                actualizarDTO.getMensajeRespuesta());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -101,3 +108,8 @@ public class MisGestionesController {
     }
 }
 
+@Data
+@AllArgsConstructor
+class ErrorResponse {
+    private String message;
+}

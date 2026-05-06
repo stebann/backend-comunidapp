@@ -70,15 +70,18 @@ public class MisGestionesService {
 
         // Verificar que no exista una solicitud ACTIVA del mismo usuario
         // (Solo bloquea si está Pendiente, Aceptada o DevolucionPendiente)
-        var solicitudActiva = misGestionesRepository
+        List<Transaccion> solicitudesExistentes = misGestionesRepository
                 .findByArticuloIdAndUsuarioSolicitanteIdAndEliminadoEnIsNull(
-                        solicitudDTO.getArticuloId(), usuarioSolicitanteId)
-                .filter(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Pendiente.getCodigo()) ||
-                             s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo()) ||
-                             s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()));
+                        solicitudDTO.getArticuloId(), usuarioSolicitanteId);
 
-        if (solicitudActiva.isPresent()) {
-            throw new RuntimeException("Ya existe una solicitud activa para este artículo");
+        boolean tieneSolicitudActiva = solicitudesExistentes.stream()
+                .anyMatch(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Pendiente.getCodigo()) ||
+                        s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo()) ||
+                        s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()));
+
+        if (tieneSolicitudActiva) {
+            throw new RuntimeException(
+                    "Ya tienes una solicitud activa para este artículo. Debes esperar a que sea devuelto o rechazado antes de solicitar nuevamente.");
         }
 
         Transaccion solicitud = new Transaccion();
@@ -178,23 +181,23 @@ public class MisGestionesService {
             if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
                 String[] imagenesArray = articulo.getImagenes().split(",");
                 List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
-                    .map(String::trim)
-                    .collect(Collectors.toList());
+                        .map(String::trim)
+                        .collect(Collectors.toList());
                 dto.setImagenes(imagenesList);
             }
             dto.setPrecio(articulo.getPrecio());
             // Categoría
             if (articulo.getCategoriaCodigo() != null) {
                 categoriaRepository.findByCodigo(articulo.getCategoriaCodigo())
-                    .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
+                        .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
             }
             // Condición del artículo
             if (articulo.getCondicionCodigo() != null) {
                 condicionArticuloRepository.findByCodigo(articulo.getCondicionCodigo())
-                    .ifPresent(condicion -> {
-                        dto.setCondicionCodigo(articulo.getCondicionCodigo());
-                        dto.setCondicionNombre(condicion.getNombre());
-                    });
+                        .ifPresent(condicion -> {
+                            dto.setCondicionCodigo(articulo.getCondicionCodigo());
+                            dto.setCondicionNombre(condicion.getNombre());
+                        });
             }
         });
 
@@ -209,7 +212,7 @@ public class MisGestionesService {
         // Estado de la transacción (Pendiente, Aceptada, Rechazada)
         dto.setEstadoCodigo(transaccion.getEstadoCodigo());
         estadoTransaccionRepository.findByCodigo(transaccion.getEstadoCodigo())
-            .ifPresent(est -> dto.setEstadoNombre(est.getNombre()));
+                .ifPresent(est -> dto.setEstadoNombre(est.getNombre()));
 
         dto.setFechaSolicitud(transaccion.getCreadoEn());
         dto.setMensaje(transaccion.getMensaje());
@@ -260,7 +263,7 @@ public class MisGestionesService {
             // Categoría
             if (articulo.getCategoriaCodigo() != null) {
                 categoriaRepository.findByCodigo(articulo.getCategoriaCodigo())
-                    .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
+                        .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
             }
         });
 
@@ -275,7 +278,7 @@ public class MisGestionesService {
         // Estado de la transacción (Pendiente, Aceptada, Rechazada)
         dto.setEstadoCodigo(transaccion.getEstadoCodigo());
         estadoTransaccionRepository.findByCodigo(transaccion.getEstadoCodigo())
-            .ifPresent(est -> dto.setEstadoNombre(est.getNombre()));
+                .ifPresent(est -> dto.setEstadoNombre(est.getNombre()));
 
         dto.setFechaSolicitud(transaccion.getCreadoEn());
         dto.setMensaje(transaccion.getMensaje());
@@ -366,48 +369,64 @@ public class MisGestionesService {
     }
 
     public MisGestionesConteoDTO obtenerConteos(Long usuarioId) {
-        // Solicitudes enviadas PENDIENTES (tipo = 1, usuario solicitante, estado = Pendiente)
+        // Solicitudes enviadas PENDIENTES (tipo = 1, usuario solicitante, estado =
+        // Pendiente)
         long solicitudesEnviadas = misGestionesRepository
-                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Solicitud.getCodigo())
+                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Solicitud.getCodigo())
                 .stream()
                 .filter(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Pendiente.getCodigo()))
                 .count();
 
-        // Solicitudes recibidas PENDIENTES (tipo = 1, usuario propietario, estado = Pendiente)
+        // Solicitudes recibidas PENDIENTES (tipo = 1, usuario propietario, estado =
+        // Pendiente)
         long solicitudesRecibidas = misGestionesRepository
-                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Solicitud.getCodigo())
+                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Solicitud.getCodigo())
                 .stream()
                 .filter(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Pendiente.getCodigo()))
                 .count();
 
-        // Préstamos otorgados (tipo = 2, usuario propietario, estado = Aceptada o DevolucionPendiente)
+        // Préstamos otorgados (tipo = 2, usuario propietario, estado = Aceptada o
+        // DevolucionPendiente)
         long prestamosOtorgados = misGestionesRepository
-                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Prestamo.getCodigo())
+                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Prestamo.getCodigo())
                 .stream()
                 .filter(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo()) ||
-                             s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()))
+                        s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()))
                 .count();
 
-        // Préstamos activos (tipo = 2, usuario solicitante, estado = Aceptada o DevolucionPendiente)
+        // Préstamos activos (tipo = 2, usuario solicitante, estado = Aceptada o
+        // DevolucionPendiente)
         long prestamosActivos = misGestionesRepository
-                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Prestamo.getCodigo())
+                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Prestamo.getCodigo())
                 .stream()
                 .filter(s -> s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo()) ||
-                             s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()))
+                        s.getEstadoCodigo().equals(EEstadoSolicitud.DevolucionPendiente.getCodigo()))
                 .count();
 
-        return new MisGestionesConteoDTO(solicitudesEnviadas, solicitudesRecibidas, prestamosOtorgados, prestamosActivos);
+        return new MisGestionesConteoDTO(solicitudesEnviadas, solicitudesRecibidas, prestamosOtorgados,
+                prestamosActivos);
     }
 
     private int getEstadoOrden(Integer estadoCodigo) {
         switch (estadoCodigo) {
-            case 1: return 0; // Pendiente
-            case 2: return 1; // Aceptada
-            case 4: return 2; // DevolucionPendiente
-            case 5: return 3; // Devuelto
-            case 3: return 4; // Rechazada
-            case 6: return 5; // Cancelado
-            default: return 6;
+            case 1:
+                return 0; // Pendiente
+            case 2:
+                return 1; // Aceptada
+            case 4:
+                return 2; // DevolucionPendiente
+            case 5:
+                return 3; // Devuelto
+            case 3:
+                return 4; // Rechazada
+            case 6:
+                return 5; // Cancelado
+            default:
+                return 6;
         }
     }
 
@@ -416,10 +435,13 @@ public class MisGestionesService {
                 .findByUsuarioSolicitanteIdAndEliminadoEnIsNull(usuarioId);
         return solicitudes.stream()
                 .filter(s -> s.getTipoCodigo().equals(ETipoSolicitud.Solicitud.getCodigo()) ||
-                             (s.getTipoCodigo().equals(ETipoSolicitud.Prestamo.getCodigo()) && s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo())))
+                        (s.getTipoCodigo().equals(ETipoSolicitud.Prestamo.getCodigo())
+                                && s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo())))
                 .sorted((t1, t2) -> {
-                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()), getEstadoOrden(t2.getEstadoCodigo()));
-                    if (ordenEstado != 0) return ordenEstado;
+                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()),
+                            getEstadoOrden(t2.getEstadoCodigo()));
+                    if (ordenEstado != 0)
+                        return ordenEstado;
                     return t2.getCreadoEn().compareTo(t1.getCreadoEn()); // Más reciente primero
                 })
                 .map(this::mapToGestionUsuarioDTO).collect(Collectors.toList());
@@ -430,10 +452,13 @@ public class MisGestionesService {
                 .findByUsuarioPropietarioIdAndEliminadoEnIsNull(usuarioId);
         return solicitudes.stream()
                 .filter(s -> s.getTipoCodigo().equals(ETipoSolicitud.Solicitud.getCodigo()) ||
-                             (s.getTipoCodigo().equals(ETipoSolicitud.Prestamo.getCodigo()) && s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo())))
+                        (s.getTipoCodigo().equals(ETipoSolicitud.Prestamo.getCodigo())
+                                && s.getEstadoCodigo().equals(EEstadoSolicitud.Aceptada.getCodigo())))
                 .sorted((t1, t2) -> {
-                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()), getEstadoOrden(t2.getEstadoCodigo()));
-                    if (ordenEstado != 0) return ordenEstado;
+                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()),
+                            getEstadoOrden(t2.getEstadoCodigo()));
+                    if (ordenEstado != 0)
+                        return ordenEstado;
                     return t2.getCreadoEn().compareTo(t1.getCreadoEn()); // Más reciente primero
                 })
                 .map(this::mapToGestionUsuarioDTO).collect(Collectors.toList());
@@ -442,11 +467,14 @@ public class MisGestionesService {
     public List<GestionUsuarioResponseDTO> obtenerPrestamosOtorgados(Long usuarioId) {
         // Préstamos otorgados: yo soy el propietario (he prestado mis artículos)
         List<Transaccion> prestamos = misGestionesRepository
-                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Prestamo.getCodigo());
+                .findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Prestamo.getCodigo());
         return prestamos.stream()
                 .sorted((t1, t2) -> {
-                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()), getEstadoOrden(t2.getEstadoCodigo()));
-                    if (ordenEstado != 0) return ordenEstado;
+                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()),
+                            getEstadoOrden(t2.getEstadoCodigo()));
+                    if (ordenEstado != 0)
+                        return ordenEstado;
                     return t2.getCreadoEn().compareTo(t1.getCreadoEn()); // Más reciente primero
                 })
                 .map(this::mapToGestionUsuarioDTO).collect(Collectors.toList());
@@ -455,17 +483,21 @@ public class MisGestionesService {
     public List<GestionUsuarioResponseDTO> obtenerPrestamosActivos(Long usuarioId) {
         // Préstamos activos: yo soy el solicitante (me han prestado)
         List<Transaccion> prestamos = misGestionesRepository
-                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId, ETipoSolicitud.Prestamo.getCodigo());
+                .findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(usuarioId,
+                        ETipoSolicitud.Prestamo.getCodigo());
         return prestamos.stream()
                 .sorted((t1, t2) -> {
-                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()), getEstadoOrden(t2.getEstadoCodigo()));
-                    if (ordenEstado != 0) return ordenEstado;
+                    int ordenEstado = Integer.compare(getEstadoOrden(t1.getEstadoCodigo()),
+                            getEstadoOrden(t2.getEstadoCodigo()));
+                    if (ordenEstado != 0)
+                        return ordenEstado;
                     return t2.getCreadoEn().compareTo(t1.getCreadoEn()); // Más reciente primero
                 })
                 .map(this::mapToGestionUsuarioDTO).collect(Collectors.toList());
     }
 
-    private void registrarCalificacion(Long transaccionId, Long usuarioQueCalificaId, CalificacionCrearDTO calificacionDTO) {
+    private void registrarCalificacion(Long transaccionId, Long usuarioQueCalificaId,
+            CalificacionCrearDTO calificacionDTO) {
         // Obtener la transacción
         Transaccion transaccion = misGestionesRepository.findByIdAndEliminadoEnIsNull(transaccionId)
                 .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
@@ -496,7 +528,8 @@ public class MisGestionesService {
 
     private void actualizarRatingPromedio(Long usuarioId) {
         // Obtener todas las calificaciones del usuario
-        List<Calificacion> calificaciones = calificacionRepository.findByUsuarioCalificadoIdAndEliminadoEnIsNull(usuarioId);
+        List<Calificacion> calificaciones = calificacionRepository
+                .findByUsuarioCalificadoIdAndEliminadoEnIsNull(usuarioId);
 
         if (!calificaciones.isEmpty()) {
             // Calcular el promedio
@@ -513,7 +546,8 @@ public class MisGestionesService {
         }
     }
 
-    public void confirmarDevolucion(Long transaccionId, Long usuarioQueCalificaId, CalificacionCrearDTO calificacionDTO) {
+    public void confirmarDevolucion(Long transaccionId, Long usuarioQueCalificaId,
+            CalificacionCrearDTO calificacionDTO) {
         Transaccion transaccion = misGestionesRepository.findByIdAndEliminadoEnIsNull(transaccionId)
                 .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
 

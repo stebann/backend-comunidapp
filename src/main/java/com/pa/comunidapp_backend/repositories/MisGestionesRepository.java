@@ -21,9 +21,12 @@ public interface MisGestionesRepository extends JpaRepository<Transaccion, Long>
 
     Optional<Transaccion> findByIdAndEliminadoEnIsNull(Long id);
 
-    Optional<Transaccion> findByArticuloIdAndUsuarioSolicitanteIdAndEliminadoEnIsNull(Long articuloId, Long usuarioSolicitanteId);
+    List<Transaccion> findByArticuloIdAndUsuarioSolicitanteIdAndEliminadoEnIsNull(Long articuloId,
+            Long usuarioSolicitanteId);
 
-    List<Transaccion> findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(Long usuarioPropietarioId, Integer tipoCodigo);
+    List<Transaccion> findByUsuarioPropietarioIdAndTipoCodigoAndEliminadoEnIsNull(Long usuarioPropietarioId,
+            Integer tipoCodigo);
 
-    List<Transaccion> findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(Long usuarioSolicitanteId, Integer tipoCodigo);
+    List<Transaccion> findByUsuarioSolicitanteIdAndTipoCodigoAndEliminadoEnIsNull(Long usuarioSolicitanteId,
+            Integer tipoCodigo);
 }
