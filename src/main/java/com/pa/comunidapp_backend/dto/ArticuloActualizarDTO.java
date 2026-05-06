@@ -33,5 +33,8 @@ public class ArticuloActualizarDTO {
     private BigDecimal precio;
 
     private MultipartFile[] imagenes;
+    
+    // URLs de las imágenes que ya existen y se deben mantener
+    private String imagenesExistentes;
 
 }

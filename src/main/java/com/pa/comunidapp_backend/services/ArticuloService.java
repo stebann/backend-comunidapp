@@ -1,6 +1,7 @@
 package com.pa.comunidapp_backend.services;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -140,7 +141,11 @@ public class ArticuloService {
 
         // Convertir string de imágenes a lista
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
-            dto.setImagenes(List.of(articulo.getImagenes().split(",")));
+            String[] imagenesArray = articulo.getImagenes().split(",");
+            List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
+                .map(String::trim)
+                .collect(Collectors.toList());
+            dto.setImagenes(imagenesList);
         }
 
         // Mapear propietario desde usuarioId
@@ -208,7 +213,11 @@ public class ArticuloService {
 
         // Convertir string de imágenes a lista
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
-            dto.setImagenes(List.of(articulo.getImagenes().split(",")));
+            String[] imagenesArray = articulo.getImagenes().split(",");
+            List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
+                .map(String::trim)
+                .collect(Collectors.toList());
+            dto.setImagenes(imagenesList);
         }
 
         return dto;
@@ -236,22 +245,45 @@ public class ArticuloService {
         if (articuloActualizarDTO.getPrecio() != null)
             articulo.setPrecio(articuloActualizarDTO.getPrecio());
 
-        // Si el cliente envía archivos en el campo `imagenes`, reemplazamos todas las imágenes
-        MultipartFile[] imagenesSubidas = articuloActualizarDTO.getImagenes();
-        if (imagenesSubidas != null && imagenesSubidas.length > 0) {
-            // Eliminar las imágenes antiguas
-            if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
-                fileStorageService.eliminarImagenes(articulo.getImagenes());
-            }
-            // Guardar las nuevas imágenes
-            List<String> rutasGuardadas = fileStorageService.guardarImagenes(imagenesSubidas);
-            if (!rutasGuardadas.isEmpty()) {
-                articulo.setImagenes(String.join(",", rutasGuardadas));
-            } else {
-                articulo.setImagenes(null);
+        // Manejo de imágenes: combinar existentes + nuevas
+        List<String> todasLasImagenes = new ArrayList<>();
+        
+        // 1. Agregar las imágenes existentes que se quieren mantener
+        if (articuloActualizarDTO.getImagenesExistentes() != null && 
+            !articuloActualizarDTO.getImagenesExistentes().trim().isEmpty()) {
+            String[] existentes = articuloActualizarDTO.getImagenesExistentes().split(",");
+            for (String url : existentes) {
+                if (!url.trim().isEmpty()) {
+                    todasLasImagenes.add(url.trim());
+                }
             }
         }
-        // Si no se envían imágenes, se mantienen las existentes
+        
+        // 2. Subir y agregar las nuevas imágenes
+        MultipartFile[] imagenesNuevas = articuloActualizarDTO.getImagenes();
+        if (imagenesNuevas != null && imagenesNuevas.length > 0) {
+            List<String> rutasNuevas = fileStorageService.guardarImagenes(imagenesNuevas);
+            todasLasImagenes.addAll(rutasNuevas);
+        }
+        
+        // 3. Identificar y eliminar las imágenes que ya no están
+        if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
+            String[] imagenesAnteriores = articulo.getImagenes().split(",");
+            for (String urlAnterior : imagenesAnteriores) {
+                String urlLimpia = urlAnterior.trim();
+                // Si la imagen anterior NO está en las existentes, eliminarla de Cloudinary
+                if (!todasLasImagenes.contains(urlLimpia)) {
+                    fileStorageService.eliminarArchivo(urlLimpia);
+                }
+            }
+        }
+        
+        // 4. Guardar todas las imágenes (existentes + nuevas)
+        if (!todasLasImagenes.isEmpty()) {
+            articulo.setImagenes(String.join(",", todasLasImagenes));
+        } else {
+            articulo.setImagenes(null);
+        }
 
         articulo.setActualizadoEn(LocalDateTime.now());
         articuloRepository.save(articulo);

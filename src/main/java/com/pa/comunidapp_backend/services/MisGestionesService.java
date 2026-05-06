@@ -297,6 +297,18 @@ public class MisGestionesService {
         });
         dto.setSolicitante(solicitanteDTO);
 
+        // Propietario
+        UsuarioBasicoDTO propietarioDTO = new UsuarioBasicoDTO();
+        usuarioRepository.findById(transaccion.getUsuarioPropietarioId()).ifPresent(usuario -> {
+            propietarioDTO.setId(usuario.getId());
+            propietarioDTO.setNombre(usuario.getNombreCompleto());
+            propietarioDTO.setEmail(usuario.getEmail());
+            propietarioDTO.setTelefono(usuario.getTelefono());
+            propietarioDTO.setDireccion(usuario.getDireccion());
+            propietarioDTO.setFoto(usuario.getAvatarUrl());
+        });
+        dto.setPropietario(propietarioDTO);
+
         return dto;
     }
 
