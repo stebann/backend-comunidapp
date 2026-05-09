@@ -77,23 +77,22 @@ INSERT INTO roles (codigo, nombre, descripcion, created_at) VALUES
 (3, 'admin-lider', 'Líder administrador', NOW());
 
 
--- Menús
+-- Menús Usuario
 INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
-('Inicio', 'inicio', 'pi pi-home', 1, NOW(), TRUE),
-('Explorar', 'explorar', 'pi pi-search', 2, NOW(), FALSE),
-('Mis Artículos', 'mis-articulos', 'pi pi-box', 3, NOW(), FALSE),
-('Mis Gestiones', 'mis-gestiones', 'pi pi-list', 4, NOW(), FALSE),
-('Estadísticas', 'estadisticas', 'pi pi-chart-line', 5, NOW(), FALSE),
-('Comercios', 'comercios', 'pi pi-shop', 6, NOW(), FALSE),
-('Análisis Predictivo', 'predictivo', 'pi pi-chart-bar', 7, NOW(), FALSE),
--- sub rutas de comercio
-('Explorar', 'comercios/explorar', 'pi pi-search', 1, NOW(), FALSE),
-('Mis Comercios', 'comercios/mis-comercios', 'pi pi-bookmark', 2, NOW(), FALSE),
--- admin
-('Inicio', 'admin-inicio', 'pi pi-home', 1, NOW(), TRUE),
-('Artículos', 'articulos', 'pi pi-box', 2, NOW(), FALSE),
-('Usuarios', 'usuarios', 'pi pi-users', 3, NOW(), FALSE),
-('Gestión Premium', 'gestion-premium', 'pi pi-crown', 4, NOW(), FALSE);
+('Inicio', 'inicio', 'lucideHome', 1, NOW(), TRUE),
+('Explorar', 'explorar', 'lucideSearch', 2, NOW(), FALSE),
+('Mis Artículos', 'mis-articulos', 'lucidePackage', 3, NOW(), FALSE),
+('Mis Gestiones', 'mis-gestiones', 'lucideClipboardList', 4, NOW(), FALSE),
+('Estadísticas', 'estadisticas', 'lucideBarChart3', 5, NOW(), FALSE),
+('Comercios', 'comercios', 'lucideStore', 6, NOW(), FALSE),
+('Análisis Predictivo', 'predictivo', 'lucideTrendingUp', 7, NOW(), FALSE);
+
+-- Menús Admin
+INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
+('Inicio', 'admin-inicio', 'lucideHome', 1, NOW(), TRUE),
+('Artículos', 'articulos', 'lucidePackage', 2, NOW(), FALSE),
+('Usuarios', 'usuarios', 'lucideUsers', 3, NOW(), FALSE),
+('Gestión Premium', 'gestion-premium', 'lucideCrown', 4, NOW(), FALSE);
 
 -- Asignación de menús por rol
 -- USUARIO (rol_id=1) obtiene menús principales 1-7 y submenús de Comercios
