@@ -49,9 +49,6 @@ public class ArticuloService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private MapperService mapperService;
-
-    @Autowired
     private FileStorageService fileStorageService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -121,30 +118,30 @@ public class ArticuloService {
         dto.setCategoriaCodigo(articulo.getCategoriaCodigo());
         if (articulo.getCategoriaCodigo() != null) {
             categoriaRepository.findByCodigo(articulo.getCategoriaCodigo())
-                .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
+                    .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
         }
         dto.setCondicionCodigo(articulo.getCondicionCodigo());
         if (articulo.getCondicionCodigo() != null) {
             condicionArticuloRepository.findByCodigo(articulo.getCondicionCodigo())
-                .ifPresent(cond -> dto.setCondicionNombre(cond.getNombre()));
+                    .ifPresent(cond -> dto.setCondicionNombre(cond.getNombre()));
         }
         dto.setEstadoArticuloCodigo(articulo.getEstadoArticuloCodigo());
         if (articulo.getEstadoArticuloCodigo() != null) {
             estadoArticuloRepository.findByCodigo(articulo.getEstadoArticuloCodigo())
-                .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
+                    .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
         }
         dto.setTipoTransaccionCodigo(articulo.getTipoTransaccionCodigo());
         if (articulo.getTipoTransaccionCodigo() != null) {
             tipoTransaccionRepository.findByCodigo(articulo.getTipoTransaccionCodigo())
-                .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
+                    .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
         }
 
         // Convertir string de imágenes a lista
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
             String[] imagenesArray = articulo.getImagenes().split(",");
             List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
-                .map(String::trim)
-                .collect(Collectors.toList());
+                    .map(String::trim)
+                    .collect(Collectors.toList());
             dto.setImagenes(imagenesList);
         }
 
@@ -164,7 +161,8 @@ public class ArticuloService {
         // Mapear solicitante desde JSON si existe y el artículo está prestado
         if (articulo.getSolicitante() != null && !articulo.getSolicitante().isEmpty()) {
             try {
-                UsuarioBasicoDTO solicitante = objectMapper.readValue(articulo.getSolicitante(), UsuarioBasicoDTO.class);
+                UsuarioBasicoDTO solicitante = objectMapper.readValue(articulo.getSolicitante(),
+                        UsuarioBasicoDTO.class);
                 dto.setSolicitante(solicitante);
             } catch (Exception e) {
                 // Si hay error al parsear, dejar solicitante vacío
@@ -193,30 +191,30 @@ public class ArticuloService {
         dto.setCategoriaCodigo(articulo.getCategoriaCodigo());
         if (articulo.getCategoriaCodigo() != null) {
             categoriaRepository.findByCodigo(articulo.getCategoriaCodigo())
-                .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
+                    .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
         }
         dto.setCondicionCodigo(articulo.getCondicionCodigo());
         if (articulo.getCondicionCodigo() != null) {
             condicionArticuloRepository.findByCodigo(articulo.getCondicionCodigo())
-                .ifPresent(cond -> dto.setCondicionNombre(cond.getNombre()));
+                    .ifPresent(cond -> dto.setCondicionNombre(cond.getNombre()));
         }
         dto.setEstadoArticuloCodigo(articulo.getEstadoArticuloCodigo());
         if (articulo.getEstadoArticuloCodigo() != null) {
             estadoArticuloRepository.findByCodigo(articulo.getEstadoArticuloCodigo())
-                .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
+                    .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
         }
         dto.setTipoTransaccionCodigo(articulo.getTipoTransaccionCodigo());
         if (articulo.getTipoTransaccionCodigo() != null) {
             tipoTransaccionRepository.findByCodigo(articulo.getTipoTransaccionCodigo())
-                .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
+                    .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
         }
 
         // Convertir string de imágenes a lista
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
             String[] imagenesArray = articulo.getImagenes().split(",");
             List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
-                .map(String::trim)
-                .collect(Collectors.toList());
+                    .map(String::trim)
+                    .collect(Collectors.toList());
             dto.setImagenes(imagenesList);
         }
 
@@ -229,7 +227,8 @@ public class ArticuloService {
                 .orElseThrow(
                         () -> new RuntimeException("Artículo no encontrado o no tienes permisos para modificarlo"));
 
-        // Actualizar solo los campos que no son null (excepto imágenes, manejadas abajo)
+        // Actualizar solo los campos que no son null (excepto imágenes, manejadas
+        // abajo)
         if (articuloActualizarDTO.getTitulo() != null)
             articulo.setTitulo(articuloActualizarDTO.getTitulo());
         if (articuloActualizarDTO.getDescripcion() != null)
@@ -247,10 +246,10 @@ public class ArticuloService {
 
         // Manejo de imágenes: combinar existentes + nuevas
         List<String> todasLasImagenes = new ArrayList<>();
-        
+
         // 1. Agregar las imágenes existentes que se quieren mantener
-        if (articuloActualizarDTO.getImagenesExistentes() != null && 
-            !articuloActualizarDTO.getImagenesExistentes().trim().isEmpty()) {
+        if (articuloActualizarDTO.getImagenesExistentes() != null &&
+                !articuloActualizarDTO.getImagenesExistentes().trim().isEmpty()) {
             String[] existentes = articuloActualizarDTO.getImagenesExistentes().split(",");
             for (String url : existentes) {
                 if (!url.trim().isEmpty()) {
@@ -258,14 +257,14 @@ public class ArticuloService {
                 }
             }
         }
-        
+
         // 2. Subir y agregar las nuevas imágenes
         MultipartFile[] imagenesNuevas = articuloActualizarDTO.getImagenes();
         if (imagenesNuevas != null && imagenesNuevas.length > 0) {
             List<String> rutasNuevas = fileStorageService.guardarImagenes(imagenesNuevas);
             todasLasImagenes.addAll(rutasNuevas);
         }
-        
+
         // 3. Identificar y eliminar las imágenes que ya no están
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
             String[] imagenesAnteriores = articulo.getImagenes().split(",");
@@ -277,7 +276,7 @@ public class ArticuloService {
                 }
             }
         }
-        
+
         // 4. Guardar todas las imágenes (existentes + nuevas)
         if (!todasLasImagenes.isEmpty()) {
             articulo.setImagenes(String.join(",", todasLasImagenes));
