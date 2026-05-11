@@ -44,7 +44,8 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
         @Query("SELECT a FROM Articulo a " +
                         "JOIN Usuario u ON u.id = a.usuarioId " +
                         "WHERE a.eliminadoEn IS NULL " +
-                        "AND (:nombreArticulo IS NULL OR LOWER(a.titulo) LIKE LOWER(CONCAT('%', :nombreArticulo, '%'))) " +
+                        "AND (:nombreArticulo IS NULL OR LOWER(a.titulo) LIKE LOWER(CONCAT('%', :nombreArticulo, '%'))) "
+                        +
                         "AND (:categoriaCodigo IS NULL OR a.categoriaCodigo = :categoriaCodigo) " +
                         "AND (:tipoTransaccionCodigo IS NULL OR a.tipoTransaccionCodigo = :tipoTransaccionCodigo) " +
                         "AND (:estadoArticuloCodigo IS NULL OR a.estadoArticuloCodigo = :estadoArticuloCodigo) " +
@@ -59,4 +60,13 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
         // Buscar artículos por comercio no eliminados
 
         // Buscar artículos por comercio y categoría no eliminados
+
+        // Contar artículos por usuario
+        long countByUsuarioIdAndEliminadoEnIsNull(Long usuarioId);
+
+        // Contar artículos por usuario y estado
+        long countByUsuarioIdAndEstadoArticuloCodigoAndEliminadoEnIsNull(Long usuarioId, Integer estadoArticuloCodigo);
+
+        // Buscar artículos por estado
+        List<Articulo> findByEstadoArticuloCodigoAndEliminadoEnIsNull(Integer estadoArticuloCodigo);
 }
