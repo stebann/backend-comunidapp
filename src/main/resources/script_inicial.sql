@@ -85,7 +85,8 @@ INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 ('Mis Gestiones', 'mis-gestiones', 'lucideClipboardList', 4, NOW(), FALSE),
 ('Estadísticas', 'estadisticas', 'lucideBarChart3', 5, NOW(), FALSE),
 ('Comercios', 'comercios', 'lucideStore', 6, NOW(), FALSE),
-('Análisis Predictivo', 'predictivo', 'lucideTrendingUp', 7, NOW(), FALSE);
+('Análisis Predictivo', 'predictivo', 'lucideTrendingUp', 7, NOW(), FALSE),
+('ComuniBot', 'comunibot', 'lucideSparkles', 8, NOW(), FALSE);
 
 -- Menús Admin
 INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
@@ -95,23 +96,13 @@ INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 ('Gestión Premium', 'gestion-premium', 'lucideCrown', 4, NOW(), FALSE);
 
 -- Asignación de menús por rol
--- USUARIO (rol_id=1) obtiene menús principales 1-7 y submenús de Comercios
+-- USUARIO (rol_id=1) obtiene menús principales 1-8
 INSERT INTO rol_menus (rol_id, menu_id)
-SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'mis-gestiones', 'estadisticas', 'comercios', 'predictivo', 'comercios/explorar', 'comercios/mis-comercios');
+SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'mis-gestiones', 'estadisticas', 'comercios', 'predictivo', 'comunibot');
 
 -- ADMIN (rol_id=2) obtiene menús admin
 INSERT INTO rol_menus (rol_id, menu_id)
 SELECT 2, id FROM menus WHERE ruta IN ('admin-inicio', 'articulos', 'usuarios', 'gestion-premium');
-
--- Establecer relaciones padre-hijo para menús
-SET @comercios_id = (SELECT id FROM menus WHERE ruta = 'comercios' LIMIT 1);
-UPDATE menus SET menu_padre_id = @comercios_id
-WHERE ruta IN ('comercios/explorar', 'comercios/mis-comercios');
-
--- Asignar permiso GESTIONAR_COMERCIOS a los submenús de comercio
-SET @permiso_gestionar = (SELECT id FROM permisos WHERE nombre = 'GESTIONAR_COMERCIOS' LIMIT 1);
-UPDATE menus SET permiso_id = @permiso_gestionar
-WHERE ruta IN ('comercios/explorar', 'comercios/mis-comercios');
 
 
 -- -- Asignar rol ADMIN (rol_id=2) a un usuario por su ID
