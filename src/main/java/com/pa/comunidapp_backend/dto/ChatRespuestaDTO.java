@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatContextoDTO {
-    private Long usuarioId;
-    private String mensaje;
-    private Boolean incluirContextoBD;
+public class ChatRespuestaDTO {
+    private String respuesta;
+    private String modelo;
+    private Integer tokensUsados;
 }
