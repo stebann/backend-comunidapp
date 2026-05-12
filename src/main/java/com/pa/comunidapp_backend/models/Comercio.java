@@ -3,6 +3,7 @@ package com.pa.comunidapp_backend.models;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -56,7 +58,9 @@ public class Comercio {
     private Boolean tieneEnvio = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @Column(length = 500)
+    @CollectionTable(name = "comercio_imagenes", joinColumns = @JoinColumn(name = "comercio_id"))
+    @OrderColumn(name = "imagen_orden")
+    @Column(name = "imagen_url", length = 500)
     private List<String> imagenes;
 
     @Column(nullable = false)
