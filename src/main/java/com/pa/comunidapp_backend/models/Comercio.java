@@ -69,6 +69,9 @@ public class Comercio {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    private Long departamentoId;
+    private Long ciudadId;
+
     private LocalDateTime creadoEn;
     private LocalDateTime actualizadoEn;
     private LocalDateTime eliminadoEn;

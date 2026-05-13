@@ -12,6 +12,41 @@ INSERT INTO categorias (codigo, nombre, creado_en, eliminado_en) VALUES
 (10, 'Otro', NOW(), NULL);
 
 
+-- Departamentos
+INSERT INTO departamentos (nombre, creado_en, eliminado_en) VALUES
+('Antioquia', NOW(), NULL),
+('Bogotá D.C.', NOW(), NULL),
+('Valle del Cauca', NOW(), NULL),
+('Atlántico', NOW(), NULL),
+('Santander', NOW(), NULL),
+('Bolívar', NOW(), NULL),
+('Caldas', NOW(), NULL),
+('Risaralda', NOW(), NULL),
+('Quindío', NOW(), NULL),
+('Huila', NOW(), NULL),
+('Magdalena', NOW(), NULL);
+
+
+-- Ciudades
+INSERT INTO ciudades (nombre, departamento_id, creado_en, eliminado_en) VALUES
+('Medellín', 1, NOW(), NULL),
+('Envigado', 1, NOW(), NULL),
+('Itagüí', 1, NOW(), NULL),
+('Bogotá', 2, NOW(), NULL),
+('Cali', 3, NOW(), NULL),
+('Palmira', 3, NOW(), NULL),
+('Barranquilla', 4, NOW(), NULL),
+('Soledad', 4, NOW(), NULL),
+('Bucaramanga', 5, NOW(), NULL),
+('Floridablanca', 5, NOW(), NULL),
+('Cartagena', 6, NOW(), NULL),
+('Manizales', 7, NOW(), NULL),
+('Pereira', 8, NOW(), NULL),
+('Armenia', 9, NOW(), NULL),
+('Neiva', 10, NOW(), NULL),
+('Santa Marta', 11, NOW(), NULL);
+
+
 -- Categorías de Comercios (codigo fijo: 1-8)
 INSERT INTO categorias_comercio (codigo, nombre, descripcion, creado_en, eliminado_en) VALUES
 (1, 'Alimentos y Bebidas', 'Comercios de comida y bebidas', NOW(), NULL),

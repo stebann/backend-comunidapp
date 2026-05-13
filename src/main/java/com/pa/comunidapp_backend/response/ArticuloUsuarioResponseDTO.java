@@ -24,6 +24,10 @@ public class ArticuloUsuarioResponseDTO {
     private String estadoArticuloNombre;
     private Integer tipoTransaccionCodigo;
     private String tipoTransaccionNombre;
+    private Long departamentoId;
+    private String departamento;
+    private Long ciudadId;
+    private String ciudad;
     private BigDecimal precio;
     private List<String> imagenes;
     private LocalDateTime creadoEn;

@@ -32,12 +32,18 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
                         "AND (:categoriaCodigo IS NULL OR a.categoriaCodigo = :categoriaCodigo) " +
                         "AND (:tipoTransaccionCodigo IS NULL OR a.tipoTransaccionCodigo = :tipoTransaccionCodigo) " +
                         "AND (:estadoArticuloCodigo IS NULL OR a.estadoArticuloCodigo = :estadoArticuloCodigo) " +
+                        "AND (:condicionCodigo IS NULL OR a.condicionCodigo = :condicionCodigo) " +
+                        "AND (:departamentoId IS NULL OR a.departamentoId = :departamentoId) " +
+                        "AND (:ciudadId IS NULL OR a.ciudadId = :ciudadId) " +
                         "AND (:nombreUsuario IS NULL OR LOWER(u.nombreUsuario) LIKE LOWER(CONCAT('%', :nombreUsuario, '%')))")
         List<Articulo> buscarArticulosConFiltros(
                         @Param("nombreArticulo") String nombreArticulo,
                         @Param("categoriaCodigo") Integer categoriaCodigo,
                         @Param("tipoTransaccionCodigo") Integer tipoTransaccionCodigo,
                         @Param("estadoArticuloCodigo") Integer estadoArticuloCodigo,
+                        @Param("condicionCodigo") Integer condicionCodigo,
+                        @Param("departamentoId") Long departamentoId,
+                        @Param("ciudadId") Long ciudadId,
                         @Param("nombreUsuario") String nombreUsuario);
 
         // Búsqueda dinámica por CODIGO (para filtros desde el frontend)
@@ -49,13 +55,41 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
                         "AND (:categoriaCodigo IS NULL OR a.categoriaCodigo = :categoriaCodigo) " +
                         "AND (:tipoTransaccionCodigo IS NULL OR a.tipoTransaccionCodigo = :tipoTransaccionCodigo) " +
                         "AND (:estadoArticuloCodigo IS NULL OR a.estadoArticuloCodigo = :estadoArticuloCodigo) " +
+                        "AND (:condicionCodigo IS NULL OR a.condicionCodigo = :condicionCodigo) " +
+                        "AND (:departamentoId IS NULL OR a.departamentoId = :departamentoId) " +
+                        "AND (:ciudadId IS NULL OR a.ciudadId = :ciudadId) " +
                         "AND (:nombreUsuario IS NULL OR LOWER(u.nombreUsuario) LIKE LOWER(CONCAT('%', :nombreUsuario, '%')))")
         List<Articulo> buscarArticulosConFiltrosPorCodigo(
                         @Param("nombreArticulo") String nombreArticulo,
                         @Param("categoriaCodigo") Integer categoriaCodigo,
                         @Param("tipoTransaccionCodigo") Integer tipoTransaccionCodigo,
                         @Param("estadoArticuloCodigo") Integer estadoArticuloCodigo,
+                        @Param("condicionCodigo") Integer condicionCodigo,
+                        @Param("departamentoId") Long departamentoId,
+                        @Param("ciudadId") Long ciudadId,
                         @Param("nombreUsuario") String nombreUsuario);
+
+        // Búsqueda dinámica de artículos por usuario con filtros
+        @Query("SELECT a FROM Articulo a " +
+                        "WHERE a.usuarioId = :usuarioId " +
+                        "AND a.eliminadoEn IS NULL " +
+                        "AND (:nombreArticulo IS NULL OR LOWER(a.titulo) LIKE LOWER(CONCAT('%', :nombreArticulo, '%'))) "
+                        +
+                        "AND (:categoriaCodigo IS NULL OR a.categoriaCodigo = :categoriaCodigo) " +
+                        "AND (:tipoTransaccionCodigo IS NULL OR a.tipoTransaccionCodigo = :tipoTransaccionCodigo) " +
+                        "AND (:estadoArticuloCodigo IS NULL OR a.estadoArticuloCodigo = :estadoArticuloCodigo) " +
+                        "AND (:condicionCodigo IS NULL OR a.condicionCodigo = :condicionCodigo) " +
+                        "AND (:departamentoId IS NULL OR a.departamentoId = :departamentoId) " +
+                        "AND (:ciudadId IS NULL OR a.ciudadId = :ciudadId)")
+        List<Articulo> buscarArticulosPorUsuarioConFiltros(
+                        @Param("usuarioId") Long usuarioId,
+                        @Param("nombreArticulo") String nombreArticulo,
+                        @Param("categoriaCodigo") Integer categoriaCodigo,
+                        @Param("tipoTransaccionCodigo") Integer tipoTransaccionCodigo,
+                        @Param("estadoArticuloCodigo") Integer estadoArticuloCodigo,
+                        @Param("condicionCodigo") Integer condicionCodigo,
+                        @Param("departamentoId") Long departamentoId,
+                        @Param("ciudadId") Long ciudadId);
 
         // Buscar artículos por comercio no eliminados
 

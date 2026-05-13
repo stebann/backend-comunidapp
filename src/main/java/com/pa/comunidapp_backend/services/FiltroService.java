@@ -10,13 +10,19 @@ import org.springframework.stereotype.Service;
 import com.pa.comunidapp_backend.models.Articulo;
 import com.pa.comunidapp_backend.models.Categoria;
 import com.pa.comunidapp_backend.models.CategoriaFiltro;
+import com.pa.comunidapp_backend.models.Ciudad;
+import com.pa.comunidapp_backend.models.CiudadFiltro;
 import com.pa.comunidapp_backend.models.CondicionesFiltro;
+import com.pa.comunidapp_backend.models.Departamento;
+import com.pa.comunidapp_backend.models.DepartamentoFiltro;
 import com.pa.comunidapp_backend.models.RolFiltro;
 import com.pa.comunidapp_backend.models.TipoFiltro;
 import com.pa.comunidapp_backend.models.TipoTransaccion;
 import com.pa.comunidapp_backend.repositories.ArticuloRepository;
 import com.pa.comunidapp_backend.repositories.CategoriaRepository;
+import com.pa.comunidapp_backend.repositories.CiudadRepository;
 import com.pa.comunidapp_backend.repositories.CondicionArticuloRepository;
+import com.pa.comunidapp_backend.repositories.DepartamentoRepository;
 import com.pa.comunidapp_backend.repositories.EstadoArticuloRepository;
 import com.pa.comunidapp_backend.repositories.RolRepository;
 import com.pa.comunidapp_backend.repositories.TipoTransaccionRepository;
@@ -43,10 +49,34 @@ public class FiltroService {
     @Autowired
     private RolRepository rolRepository;
 
+    @Autowired
+    private DepartamentoRepository departamentoRepository;
+
+    @Autowired
+    private CiudadRepository ciudadRepository;
+
     public List<RolFiltro> obtenerRoles() {
         return rolRepository.findAll().stream()
             .map(rol -> new RolFiltro(rol.getCodigo(), rol.getNombre()))
             .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<DepartamentoFiltro> obtenerDepartamentos() {
+        return departamentoRepository.findByEliminadoEnIsNull().stream()
+            .map(dep -> new DepartamentoFiltro(dep.getId().intValue(), dep.getNombre()))
+            .collect(Collectors.toList());
+    }
+
+    public List<CiudadFiltro> obtenerCiudadesPorDepartamento(Long departamentoId) {
+        return ciudadRepository.findByDepartamentoIdAndEliminadoEnIsNull(departamentoId).stream()
+            .map(ciu -> new CiudadFiltro(ciu.getId().intValue(), ciu.getNombre()))
+            .collect(Collectors.toList());
+    }
+
+    public List<CiudadFiltro> obtenerTodasLasCiudades() {
+        return ciudadRepository.findByEliminadoEnIsNull().stream()
+            .map(ciu -> new CiudadFiltro(ciu.getId().intValue(), ciu.getNombre()))
+            .collect(Collectors.toList());
     }
 
     public List<CategoriaFiltro> obtenerCategorias() {
@@ -92,9 +122,9 @@ public class FiltroService {
     }
 
     public List<ArticuloResponseDTO> buscarArticulos(String nombreArticulo, Integer categoriaCodigo, Integer tipoTransaccionCodigo,
-            Integer estadoArticuloCodigo, String nombreUsuario) {
+            Integer estadoArticuloCodigo, Integer condicionCodigo, Long departamentoId, Long ciudadId, String nombreUsuario) {
         List<Articulo> articulos = articuloRepository.buscarArticulosConFiltrosPorCodigo(nombreArticulo, categoriaCodigo, tipoTransaccionCodigo, estadoArticuloCodigo,
-                nombreUsuario);
+                condicionCodigo, departamentoId, ciudadId, nombreUsuario);
         return articulos.stream()
                 .map(this::mapToArticuloResponseDTO)
                 .collect(Collectors.toList());

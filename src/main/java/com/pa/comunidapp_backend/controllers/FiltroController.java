@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pa.comunidapp_backend.models.CategoriaArticuloComercioFiltro;
 import com.pa.comunidapp_backend.models.CategoriaComercioFiltro;
 import com.pa.comunidapp_backend.models.CategoriaFiltro;
+import com.pa.comunidapp_backend.models.CiudadFiltro;
 import com.pa.comunidapp_backend.models.CondicionesFiltro;
+import com.pa.comunidapp_backend.models.DepartamentoFiltro;
 import com.pa.comunidapp_backend.models.RolFiltro;
 import com.pa.comunidapp_backend.models.TipoFiltro;
 import com.pa.comunidapp_backend.response.ArticuloResponseDTO;
@@ -61,6 +63,16 @@ public class FiltroController {
         return ResponseEntity.ok(roles);
     }
 
+    @GetMapping("/departamentos")
+    public ResponseEntity<List<DepartamentoFiltro>> obtenerDepartamentos() {
+        return ResponseEntity.ok(filtroService.obtenerDepartamentos());
+    }
+
+    @GetMapping("/ciudades")
+    public ResponseEntity<List<CiudadFiltro>> obtenerCiudades() {
+        return ResponseEntity.ok(filtroService.obtenerTodasLasCiudades());
+    }
+
     @GetMapping("/categorias-comercios")
     public ResponseEntity<List<CategoriaComercioFiltro>> obtenerCategoriasComercios() {
         List<CategoriaComercioFiltro> categorias = categoriaComercioService.obtenerTodasLasCategorias();
@@ -81,12 +93,12 @@ public class FiltroController {
             @RequestParam(required = false) Integer categoriaCodigo,
             @RequestParam(required = false) Integer tipoTransaccionCodigo,
             @RequestParam(required = false) Integer estadoArticuloCodigo,
+            @RequestParam(required = false) Integer condicionCodigo,
+            @RequestParam(required = false) Long departamentoId,
+            @RequestParam(required = false) Long ciudadId,
             @RequestParam(required = false) String nombreUsuario) {
-
         List<ArticuloResponseDTO> articulos = filtroService.buscarArticulos(nombreArticulo, categoriaCodigo,
-                tipoTransaccionCodigo,
-                estadoArticuloCodigo,
-                nombreUsuario);
+                tipoTransaccionCodigo, estadoArticuloCodigo, condicionCodigo, departamentoId, ciudadId, nombreUsuario);
         return ResponseEntity.ok(articulos);
     }
 }

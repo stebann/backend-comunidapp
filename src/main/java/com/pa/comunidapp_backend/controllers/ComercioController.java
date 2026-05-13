@@ -48,8 +48,21 @@ public class ComercioController {
     private CategoriaArticuloComercioService categoriaArticuloComercioService;
 
     @GetMapping
-    public ResponseEntity<List<ComercioResumenDTO>> obtenerTodosComercios() {
-        List<ComercioResumenDTO> comercios = comercioService.obtenerTodosComercios();
+    public ResponseEntity<List<ComercioResumenDTO>> obtenerTodosComercios(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) Long departamentoId,
+            @RequestParam(required = false) Long ciudadId) {
+
+        List<ComercioResumenDTO> comercios;
+
+        if (nombre == null && categoriaId == null && departamentoId == null && ciudadId == null) {
+            comercios = comercioService.obtenerTodosComercios();
+        } else {
+            // Por defecto solo comercios activos para el público general
+            comercios = comercioService.obtenerComerciosConFiltros(nombre, categoriaId, null, true, departamentoId, ciudadId);
+        }
+
         return ResponseEntity.ok(comercios);
     }
 
@@ -61,8 +74,22 @@ public class ComercioController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<ComercioResumenDTO>> obtenerComerciosPorUsuario(@PathVariable Long usuarioId) {
-        List<ComercioResumenDTO> comercios = comercioService.obtenerComerciosPorUsuarioDTO(usuarioId);
+    public ResponseEntity<List<ComercioResumenDTO>> obtenerComerciosPorUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) Long departamentoId,
+            @RequestParam(required = false) Long ciudadId,
+            @RequestParam(required = false) Boolean activo) {
+
+        List<ComercioResumenDTO> comercios;
+
+        if (nombre == null && categoriaId == null && activo == null && departamentoId == null && ciudadId == null) {
+            comercios = comercioService.obtenerComerciosPorUsuarioDTO(usuarioId);
+        } else {
+            comercios = comercioService.obtenerComerciosConFiltros(nombre, categoriaId, usuarioId, activo, departamentoId, ciudadId);
+        }
+
         return ResponseEntity.ok(comercios);
     }
 

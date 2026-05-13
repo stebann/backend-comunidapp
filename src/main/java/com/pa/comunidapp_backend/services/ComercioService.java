@@ -50,18 +50,32 @@ public class ComercioService {
      */
     public List<ComercioResumenDTO> obtenerTodosComercios() {
         return comercioRepository.findByEliminadoEnIsNullAndActivoTrue().stream()
-                .map(comercio -> new ComercioResumenDTO(
-                        comercio.getId(),
-                        comercio.getNombre(),
-                        comercio.getDescripcion(),
-                        comercio.getDireccion(),
-                        comercio.getTelefono(),
-                        comercio.getEmail(),
-                        comercio.getImagenes(),
-                        comercio.getSitioWeb(),
-                        comercio.getTieneEnvio(),
-                        comercio.getCategoria().getNombre()))
+                .map(this::mapToComercioResumenDTO)
                 .toList();
+    }
+
+    /**
+     * Obtiene comercios con filtros opcionales
+     */
+    public List<ComercioResumenDTO> obtenerComerciosConFiltros(String nombre, Long categoriaId, Long usuarioId,
+            Boolean activo, Long departamentoId, Long ciudadId) {
+        return comercioRepository.buscarComerciosConFiltros(nombre, categoriaId, usuarioId, activo, departamentoId, ciudadId).stream()
+                .map(this::mapToComercioResumenDTO)
+                .toList();
+    }
+
+    private ComercioResumenDTO mapToComercioResumenDTO(Comercio comercio) {
+        return new ComercioResumenDTO(
+                comercio.getId(),
+                comercio.getNombre(),
+                comercio.getDescripcion(),
+                comercio.getDireccion(),
+                comercio.getTelefono(),
+                comercio.getEmail(),
+                comercio.getImagenes(),
+                comercio.getSitioWeb(),
+                comercio.getTieneEnvio(),
+                comercio.getCategoria() != null ? comercio.getCategoria().getNombre() : null);
     }
 
     /**
@@ -183,17 +197,7 @@ public class ComercioService {
      */
     public List<ComercioResumenDTO> obtenerComerciosPorUsuarioDTO(Long usuarioId) {
         return comercioRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId).stream()
-                .map(c -> new ComercioResumenDTO(
-                        c.getId(),
-                        c.getNombre(),
-                        c.getDescripcion(),
-                        c.getDireccion(),
-                        c.getTelefono(),
-                        c.getEmail(),
-                        c.getImagenes(),
-                        c.getSitioWeb(),
-                        c.getTieneEnvio(),
-                        c.getCategoria().getNombre()))
+                .map(this::mapToComercioResumenDTO)
                 .toList();
     }
 

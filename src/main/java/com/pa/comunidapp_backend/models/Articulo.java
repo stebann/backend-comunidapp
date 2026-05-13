@@ -36,6 +36,9 @@ public class Articulo {
     private Integer estadoArticuloCodigo;
     private Integer tipoTransaccionCodigo;
 
+    private Long departamentoId;
+    private Long ciudadId;
+
     private BigDecimal precio;
 
     @Column(columnDefinition = "TEXT")

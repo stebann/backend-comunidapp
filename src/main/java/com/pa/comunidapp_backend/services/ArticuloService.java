@@ -18,7 +18,9 @@ import com.pa.comunidapp_backend.enums.EEstadoArticulo;
 import com.pa.comunidapp_backend.models.Articulo;
 import com.pa.comunidapp_backend.repositories.ArticuloRepository;
 import com.pa.comunidapp_backend.repositories.CategoriaRepository;
+import com.pa.comunidapp_backend.repositories.CiudadRepository;
 import com.pa.comunidapp_backend.repositories.CondicionArticuloRepository;
+import com.pa.comunidapp_backend.repositories.DepartamentoRepository;
 import com.pa.comunidapp_backend.repositories.EstadoArticuloRepository;
 import com.pa.comunidapp_backend.repositories.TipoTransaccionRepository;
 import com.pa.comunidapp_backend.repositories.UsuarioRepository;
@@ -49,6 +51,12 @@ public class ArticuloService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private DepartamentoRepository departamentoRepository;
+
+    @Autowired
+    private CiudadRepository ciudadRepository;
+
+    @Autowired
     private FileStorageService fileStorageService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -60,6 +68,8 @@ public class ArticuloService {
         articulo.setCategoriaCodigo(articuloCrearDTO.getCategoriaCodigo());
         articulo.setCondicionCodigo(articuloCrearDTO.getCondicionCodigo());
         articulo.setTipoTransaccionCodigo(articuloCrearDTO.getTipoTransaccionCodigo());
+        articulo.setDepartamentoId(articuloCrearDTO.getDepartamentoCodigo());
+        articulo.setCiudadId(articuloCrearDTO.getCiudadCodigo());
         articulo.setPrecio(articuloCrearDTO.getPrecio());
         articulo.setUsuarioId(usuarioId);
         articulo.setCreadoEn(LocalDateTime.now());
@@ -100,6 +110,31 @@ public class ArticuloService {
                 .collect(Collectors.toList());
     }
 
+    public List<ArticuloResponseDTO> obtenerArticulosConFiltros(
+            String nombreArticulo,
+            Integer categoriaCodigo,
+            Integer tipoTransaccionCodigo,
+            Integer estadoArticuloCodigo,
+            Integer condicionCodigo,
+            Long departamentoId,
+            Long ciudadId,
+            String nombreUsuario) {
+
+        List<Articulo> articulos = articuloRepository.buscarArticulosConFiltros(
+                nombreArticulo,
+                categoriaCodigo,
+                tipoTransaccionCodigo,
+                estadoArticuloCodigo,
+                condicionCodigo,
+                departamentoId,
+                ciudadId,
+                nombreUsuario);
+
+        return articulos.stream()
+                .map(this::mapToArticuloResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public ArticuloResponseDTO obtenerArticuloPorId(Long id) {
         Articulo articulo = articuloRepository.findByIdAndEliminadoEnIsNull(id)
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
@@ -130,13 +165,24 @@ public class ArticuloService {
             estadoArticuloRepository.findByCodigo(articulo.getEstadoArticuloCodigo())
                     .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
         }
-        dto.setTipoTransaccionCodigo(articulo.getTipoTransaccionCodigo());
         if (articulo.getTipoTransaccionCodigo() != null) {
+            dto.setTipoTransaccionCodigo(articulo.getTipoTransaccionCodigo());
             tipoTransaccionRepository.findByCodigo(articulo.getTipoTransaccionCodigo())
                     .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
         }
 
-        // Convertir string de imágenes a lista
+        dto.setDepartamentoId(articulo.getDepartamentoId());
+        if (articulo.getDepartamentoId() != null) {
+            departamentoRepository.findById(articulo.getDepartamentoId())
+                    .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
+        }
+
+        dto.setCiudadId(articulo.getCiudadId());
+        if (articulo.getCiudadId() != null) {
+            ciudadRepository.findById(articulo.getCiudadId())
+                    .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
+        }
+
         if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
             String[] imagenesArray = articulo.getImagenes().split(",");
             List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
@@ -180,45 +226,52 @@ public class ArticuloService {
     }
 
     private ArticuloUsuarioResponseDTO mapToArticuloUsuarioResponseDTO(Articulo articulo) {
+        ArticuloResponseDTO fullDto = mapToArticuloResponseDTO(articulo);
         ArticuloUsuarioResponseDTO dto = new ArticuloUsuarioResponseDTO();
-        dto.setId(articulo.getId());
-        dto.setTitulo(articulo.getTitulo());
-        dto.setDescripcion(articulo.getDescripcion());
-        dto.setPrecio(articulo.getPrecio());
-        dto.setCreadoEn(articulo.getCreadoEn());
-
-        // Asignar directamente los códigos y nombres si están presentes
-        dto.setCategoriaCodigo(articulo.getCategoriaCodigo());
-        if (articulo.getCategoriaCodigo() != null) {
-            categoriaRepository.findByCodigo(articulo.getCategoriaCodigo())
-                    .ifPresent(cat -> dto.setCategoriaNombre(cat.getNombre()));
-        }
-        dto.setCondicionCodigo(articulo.getCondicionCodigo());
-        if (articulo.getCondicionCodigo() != null) {
-            condicionArticuloRepository.findByCodigo(articulo.getCondicionCodigo())
-                    .ifPresent(cond -> dto.setCondicionNombre(cond.getNombre()));
-        }
-        dto.setEstadoArticuloCodigo(articulo.getEstadoArticuloCodigo());
-        if (articulo.getEstadoArticuloCodigo() != null) {
-            estadoArticuloRepository.findByCodigo(articulo.getEstadoArticuloCodigo())
-                    .ifPresent(est -> dto.setEstadoArticuloNombre(est.getNombre()));
-        }
-        dto.setTipoTransaccionCodigo(articulo.getTipoTransaccionCodigo());
-        if (articulo.getTipoTransaccionCodigo() != null) {
-            tipoTransaccionRepository.findByCodigo(articulo.getTipoTransaccionCodigo())
-                    .ifPresent(tipo -> dto.setTipoTransaccionNombre(tipo.getNombre()));
-        }
-
-        // Convertir string de imágenes a lista
-        if (articulo.getImagenes() != null && !articulo.getImagenes().isEmpty()) {
-            String[] imagenesArray = articulo.getImagenes().split(",");
-            List<String> imagenesList = java.util.Arrays.stream(imagenesArray)
-                    .map(String::trim)
-                    .collect(Collectors.toList());
-            dto.setImagenes(imagenesList);
-        }
-
+        dto.setId(fullDto.getId());
+        dto.setTitulo(fullDto.getTitulo());
+        dto.setDescripcion(fullDto.getDescripcion());
+        dto.setPrecio(fullDto.getPrecio());
+        dto.setCreadoEn(fullDto.getCreadoEn());
+        dto.setCategoriaCodigo(fullDto.getCategoriaCodigo());
+        dto.setCategoriaNombre(fullDto.getCategoriaNombre());
+        dto.setCondicionCodigo(fullDto.getCondicionCodigo());
+        dto.setCondicionNombre(fullDto.getCondicionNombre());
+        dto.setEstadoArticuloCodigo(fullDto.getEstadoArticuloCodigo());
+        dto.setEstadoArticuloNombre(fullDto.getEstadoArticuloNombre());
+        dto.setTipoTransaccionCodigo(fullDto.getTipoTransaccionCodigo());
+        dto.setTipoTransaccionNombre(fullDto.getTipoTransaccionNombre());
+        dto.setDepartamentoId(fullDto.getDepartamentoId());
+        dto.setDepartamento(fullDto.getDepartamento());
+        dto.setCiudadId(fullDto.getCiudadId());
+        dto.setCiudad(fullDto.getCiudad());
+        dto.setImagenes(fullDto.getImagenes());
         return dto;
+    }
+
+    public List<ArticuloUsuarioResponseDTO> obtenerArticulosPorUsuarioConFiltros(
+            Long usuarioId,
+            String nombreArticulo,
+            Integer categoriaCodigo,
+            Integer tipoTransaccionCodigo,
+            Integer estadoArticuloCodigo,
+            Integer condicionCodigo,
+            Long departamentoId,
+            Long ciudadId) {
+
+        List<Articulo> articulos = articuloRepository.buscarArticulosPorUsuarioConFiltros(
+                usuarioId,
+                nombreArticulo,
+                categoriaCodigo,
+                tipoTransaccionCodigo,
+                estadoArticuloCodigo,
+                condicionCodigo,
+                departamentoId,
+                ciudadId);
+
+        return articulos.stream()
+                .map(this::mapToArticuloUsuarioResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public void actualizarArticulo(Long id, ArticuloActualizarDTO articuloActualizarDTO,
@@ -241,6 +294,10 @@ public class ArticuloService {
             articulo.setEstadoArticuloCodigo(articuloActualizarDTO.getEstadoArticuloCodigo());
         if (articuloActualizarDTO.getTipoTransaccionCodigo() != null)
             articulo.setTipoTransaccionCodigo(articuloActualizarDTO.getTipoTransaccionCodigo());
+        if (articuloActualizarDTO.getDepartamentoCodigo() != null)
+            articulo.setDepartamentoId(articuloActualizarDTO.getDepartamentoCodigo());
+        if (articuloActualizarDTO.getCiudadCodigo() != null)
+            articulo.setCiudadId(articuloActualizarDTO.getCiudadCodigo());
         if (articuloActualizarDTO.getPrecio() != null)
             articulo.setPrecio(articuloActualizarDTO.getPrecio());
 

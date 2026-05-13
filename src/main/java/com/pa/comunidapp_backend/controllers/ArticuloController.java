@@ -43,8 +43,36 @@ public class ArticuloController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ArticuloResponseDTO>> obtenerTodosLosArticulos() {
-        List<ArticuloResponseDTO> articulos = articuloService.obtenerTodosLosArticulos();
+    public ResponseEntity<List<ArticuloResponseDTO>> obtenerTodosLosArticulos(
+            @RequestParam(required = false) String nombreArticulo,
+            @RequestParam(required = false) Integer categoriaCodigo,
+            @RequestParam(required = false) Integer tipoTransaccionCodigo,
+            @RequestParam(required = false) Integer estadoArticuloCodigo,
+            @RequestParam(required = false) Integer condicionCodigo,
+            @RequestParam(required = false) Long departamentoId,
+            @RequestParam(required = false) Long ciudadId,
+            @RequestParam(required = false) String nombreUsuario) {
+
+        List<ArticuloResponseDTO> articulos;
+
+        // Si no hay filtros, usar el método simple
+        if (nombreArticulo == null && categoriaCodigo == null && tipoTransaccionCodigo == null
+                && estadoArticuloCodigo == null && condicionCodigo == null && departamentoId == null
+                && ciudadId == null && nombreUsuario == null) {
+            articulos = articuloService.obtenerTodosLosArticulos();
+        } else {
+            // Si hay filtros, usar el método con filtros
+            articulos = articuloService.obtenerArticulosConFiltros(
+                    nombreArticulo,
+                    categoriaCodigo,
+                    tipoTransaccionCodigo,
+                    estadoArticuloCodigo,
+                    condicionCodigo,
+                    departamentoId,
+                    ciudadId,
+                    nombreUsuario);
+        }
+
         return new ResponseEntity<>(articulos, HttpStatus.OK);
     }
 
@@ -55,8 +83,36 @@ public class ArticuloController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<ArticuloUsuarioResponseDTO>> obtenerArticulosPorUsuario(@PathVariable Long usuarioId) {
-        List<ArticuloUsuarioResponseDTO> articulos = articuloService.obtenerArticulosPorUsuario(usuarioId);
+    public ResponseEntity<List<ArticuloUsuarioResponseDTO>> obtenerArticulosPorUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) String nombreArticulo,
+            @RequestParam(required = false) Integer categoriaCodigo,
+            @RequestParam(required = false) Integer tipoTransaccionCodigo,
+            @RequestParam(required = false) Integer estadoArticuloCodigo,
+            @RequestParam(required = false) Integer condicionCodigo,
+            @RequestParam(required = false) Long departamentoId,
+            @RequestParam(required = false) Long ciudadId) {
+
+        List<ArticuloUsuarioResponseDTO> articulos;
+
+        // Si no hay filtros, usar el método simple
+        if (nombreArticulo == null && categoriaCodigo == null && tipoTransaccionCodigo == null
+                && estadoArticuloCodigo == null && condicionCodigo == null && departamentoId == null
+                && ciudadId == null) {
+            articulos = articuloService.obtenerArticulosPorUsuario(usuarioId);
+        } else {
+            // Si hay filtros, usar el método con filtros
+            articulos = articuloService.obtenerArticulosPorUsuarioConFiltros(
+                    usuarioId,
+                    nombreArticulo,
+                    categoriaCodigo,
+                    tipoTransaccionCodigo,
+                    estadoArticuloCodigo,
+                    condicionCodigo,
+                    departamentoId,
+                    ciudadId);
+        }
+
         return new ResponseEntity<>(articulos, HttpStatus.OK);
     }
 
