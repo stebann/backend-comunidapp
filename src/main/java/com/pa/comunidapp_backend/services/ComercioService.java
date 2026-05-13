@@ -15,7 +15,9 @@ import com.pa.comunidapp_backend.models.Comercio;
 import com.pa.comunidapp_backend.models.Usuario;
 import com.pa.comunidapp_backend.models.UsuarioPermiso;
 import com.pa.comunidapp_backend.repositories.CategoriaComercioRepository;
+import com.pa.comunidapp_backend.repositories.CiudadRepository;
 import com.pa.comunidapp_backend.repositories.ComercioRepository;
+import com.pa.comunidapp_backend.repositories.DepartamentoRepository;
 import com.pa.comunidapp_backend.repositories.UsuarioPermisoRepository;
 import com.pa.comunidapp_backend.repositories.UsuarioRepository;
 
@@ -33,6 +35,12 @@ public class ComercioService {
 
     @Autowired
     private CategoriaComercioRepository categoriaComercioRepository;
+
+    @Autowired
+    private DepartamentoRepository departamentoRepository;
+
+    @Autowired
+    private CiudadRepository ciudadRepository;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -59,23 +67,39 @@ public class ComercioService {
      */
     public List<ComercioResumenDTO> obtenerComerciosConFiltros(String nombre, Long categoriaId, Long usuarioId,
             Boolean activo, Long departamentoId, Long ciudadId) {
-        return comercioRepository.buscarComerciosConFiltros(nombre, categoriaId, usuarioId, activo, departamentoId, ciudadId).stream()
+        return comercioRepository
+                .buscarComerciosConFiltros(nombre, categoriaId, usuarioId, activo, departamentoId, ciudadId).stream()
                 .map(this::mapToComercioResumenDTO)
                 .toList();
     }
 
     private ComercioResumenDTO mapToComercioResumenDTO(Comercio comercio) {
-        return new ComercioResumenDTO(
-                comercio.getId(),
-                comercio.getNombre(),
-                comercio.getDescripcion(),
-                comercio.getDireccion(),
-                comercio.getTelefono(),
-                comercio.getEmail(),
-                comercio.getImagenes(),
-                comercio.getSitioWeb(),
-                comercio.getTieneEnvio(),
-                comercio.getCategoria() != null ? comercio.getCategoria().getNombre() : null);
+        ComercioResumenDTO dto = new ComercioResumenDTO();
+        dto.setId(comercio.getId());
+        dto.setNombre(comercio.getNombre());
+        dto.setDescripcion(comercio.getDescripcion());
+        dto.setDireccion(comercio.getDireccion());
+        dto.setTelefono(comercio.getTelefono());
+        dto.setEmail(comercio.getEmail());
+        dto.setImagenes(comercio.getImagenes());
+        dto.setSitioWeb(comercio.getSitioWeb());
+        dto.setTieneEnvio(comercio.getTieneEnvio());
+        dto.setCategoriaNombre(comercio.getCategoria() != null ? comercio.getCategoria().getNombre() : null);
+
+        // Mapear ubicación
+         dto.setDepartamentoCodigo(comercio.getDepartamentoId());
+         if (comercio.getDepartamentoId() != null) {
+             departamentoRepository.findById(comercio.getDepartamentoId())
+                     .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
+         }
+
+         dto.setCiudadCodigo(comercio.getCiudadId());
+         if (comercio.getCiudadId() != null) {
+             ciudadRepository.findById(comercio.getCiudadId())
+                     .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
+         }
+
+        return dto;
     }
 
     /**
@@ -121,6 +145,8 @@ public class ComercioService {
         comercio.setEmail(comercioDTO.getEmail());
         comercio.setSitioWeb(comercioDTO.getSitioWeb());
         comercio.setTieneEnvio(comercioDTO.getTieneEnvio());
+        comercio.setDepartamentoId(comercioDTO.getDepartamentoCodigo());
+        comercio.setCiudadId(comercioDTO.getCiudadCodigo());
         comercio.setActivo(true);
         comercio.setCreadoEn(LocalDateTime.now());
         comercio.setActualizadoEn(LocalDateTime.now());
@@ -160,6 +186,10 @@ public class ComercioService {
         comercio.setEmail(comercioDTO.getEmail());
         comercio.setSitioWeb(comercioDTO.getSitioWeb());
         comercio.setTieneEnvio(comercioDTO.getTieneEnvio());
+        if (comercioDTO.getDepartamentoCodigo() != null)
+            comercio.setDepartamentoId(comercioDTO.getDepartamentoCodigo());
+        if (comercioDTO.getCiudadCodigo() != null)
+            comercio.setCiudadId(comercioDTO.getCiudadCodigo());
         comercio.setActualizadoEn(LocalDateTime.now());
 
         // Guardar las imágenes y obtener las rutas (si hay nuevas imágenes)
@@ -179,17 +209,7 @@ public class ComercioService {
      */
     public Optional<ComercioResumenDTO> obtenerComercioByIdDTO(Long id) {
         Optional<Comercio> comercio = comercioRepository.findByIdAndEliminadoEnIsNull(id);
-        return comercio.map(c -> new ComercioResumenDTO(
-                c.getId(),
-                c.getNombre(),
-                c.getDescripcion(),
-                c.getDireccion(),
-                c.getTelefono(),
-                c.getEmail(),
-                c.getImagenes(),
-                c.getSitioWeb(),
-                c.getTieneEnvio(),
-                c.getCategoria().getNombre()));
+        return comercio.map(this::mapToComercioResumenDTO);
     }
 
     /**
@@ -221,20 +241,41 @@ public class ComercioService {
      * Obtiene un comercio por ID con todos sus artículos
      */
     public Optional<ComercioDetalleDTO> obtenerComercioByIdConArticulos(Long id) {
-        Optional<Comercio> comercio = comercioRepository.findByIdAndEliminadoEnIsNull(id);
-        return comercio.map(c -> new ComercioDetalleDTO(
-                c.getId(),
-                c.getNombre(),
-                c.getDescripcion(),
-                c.getDireccion(),
-                c.getTelefono(),
-                c.getEmail(),
-                c.getImagenes(),
-                c.getSitioWeb(),
-                c.getTieneEnvio(),
-                c.getCategoria().getId(),
-                c.getCategoria().getNombre(),
-                categoriaArticuloComercioService.obtenerCategoriasComercio(c.getId()),
-                articuloComercioService.obtenerArticulosComercio(c.getId())));
+        Optional<Comercio> comercioOptional = comercioRepository.findByIdAndEliminadoEnIsNull(id);
+        if (comercioOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Comercio c = comercioOptional.get();
+        ComercioDetalleDTO dto = new ComercioDetalleDTO();
+        dto.setId(c.getId());
+        dto.setNombre(c.getNombre());
+        dto.setDescripcion(c.getDescripcion());
+        dto.setDireccion(c.getDireccion());
+        dto.setTelefono(c.getTelefono());
+        dto.setEmail(c.getEmail());
+        dto.setImagenes(c.getImagenes());
+        dto.setSitioWeb(c.getSitioWeb());
+        dto.setTieneEnvio(c.getTieneEnvio());
+        dto.setCategoriaId(c.getCategoria().getId());
+        dto.setCategoriaNombre(c.getCategoria().getNombre());
+
+         // Mapear ubicación
+         dto.setDepartamentoCodigo(c.getDepartamentoId());
+         if (c.getDepartamentoId() != null) {
+             departamentoRepository.findById(c.getDepartamentoId())
+                     .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
+         }
+
+         dto.setCiudadCodigo(c.getCiudadId());
+         if (c.getCiudadId() != null) {
+             ciudadRepository.findById(c.getCiudadId())
+                     .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
+         }
+
+        dto.setCategorias(categoriaArticuloComercioService.obtenerCategoriasComercio(c.getId()));
+        dto.setArticulos(articuloComercioService.obtenerArticulosComercio(c.getId()));
+
+        return Optional.of(dto);
     }
 }

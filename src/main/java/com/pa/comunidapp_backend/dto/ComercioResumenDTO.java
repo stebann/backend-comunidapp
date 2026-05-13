@@ -20,4 +20,8 @@ public class ComercioResumenDTO {
     private String sitioWeb;
     private Boolean tieneEnvio;
     private String categoriaNombre;
+    private Long departamentoCodigo;
+    private String departamento;
+    private Long ciudadCodigo;
+    private String ciudad;
 }

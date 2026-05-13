@@ -40,5 +40,9 @@ public class ComercioCrearDTO {
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
+    private Long departamentoCodigo;
+
+    private Long ciudadCodigo;
+
     private MultipartFile[] imagenes;
 }

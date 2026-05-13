@@ -21,6 +21,10 @@ public class ComercioDetalleDTO {
     private Boolean tieneEnvio;
     private Long categoriaId;
     private String categoriaNombre;
+    private Long departamentoCodigo;
+    private String departamento;
+    private Long ciudadCodigo;
+    private String ciudad;
     private List<CategoriaArticuloComercioResponseDTO> categorias;
     private List<ArticuloComercioResponseDTO> articulos;
 }
