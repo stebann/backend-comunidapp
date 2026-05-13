@@ -53,10 +53,6 @@ public class Menu {
     @JoinColumn(name = "menu_padre_id")
     private Menu menuPadre;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "permiso_id")
-    private Permiso permiso;
-
     @OneToMany(mappedBy = "menuPadre", fetch = FetchType.EAGER)
     private List<Menu> hijos = new ArrayList<>();
 }

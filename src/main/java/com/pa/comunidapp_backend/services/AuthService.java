@@ -67,12 +67,10 @@ public class AuthService {
         // Obtener menús del rol del usuario
         List<Menu> menus = menuService.getMenusByRolId(usuarioObj.getRol().getId());
 
-        // Filtrar solo menús principales (sin padre) y convertir a DTO con hijos,
-        // aplicando filtro de permisos
+        // Filtrar solo menús principales (sin padre) y convertir a DTO con hijos
         List<MenuDTO> menusDTO = menus.stream()
                 .filter(m -> m.getMenuPadre() == null)
-                .filter(m -> tienePermisoParaMenu(m, permisos))
-                .map(m -> convertMenuToDTO(m, permisos))
+                .map(this::convertMenuToDTO)
                 .sorted((a, b) -> a.getOrden().compareTo(b.getOrden()))
                 .collect(Collectors.toList());
 
@@ -91,17 +89,9 @@ public class AuthService {
         return ResponseEntity.ok(dto);
     }
 
-    private boolean tienePermisoParaMenu(Menu menu, List<String> permisosUsuario) {
-        if (menu.getPermiso() == null) {
-            return true;
-        }
-        return permisosUsuario.contains(menu.getPermiso().getNombre());
-    }
-
-    private MenuDTO convertMenuToDTO(Menu menu, List<String> permisosUsuario) {
+    private MenuDTO convertMenuToDTO(Menu menu) {
         List<MenuDTO> hijosDTO = menu.getHijos().stream()
-                .filter(h -> tienePermisoParaMenu(h, permisosUsuario))
-                .map(h -> convertMenuToDTO(h, permisosUsuario))
+                .map(this::convertMenuToDTO)
                 .sorted((a, b) -> a.getOrden().compareTo(b.getOrden()))
                 .collect(Collectors.toList());
 
