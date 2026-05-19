@@ -42,59 +42,59 @@ INSERT INTO comercios (usuario_id, categoria_id, nombre, descripcion, telefono, 
 
 -- Artículos del Usuario 1 (Medellín)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(1, 'Laptop HP Pavilion', 'Laptop en excelente estado, 8GB RAM, 256GB SSD', 1, 2, 1, 1, 1200000, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(1, 'Bicicleta de Montaña', 'Bicicleta Trek, poco uso, incluye casco', 3, 2, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(1, 'Libro de Programación Java', 'Libro en buen estado, ideal para principiantes', 4, 3, 1, 1, 35000, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(1, 'Laptop HP Pavilion', 'Laptop en excelente estado, 8GB RAM, 256GB SSD', 1, 2, 1, 1, 1200000, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), NULL, NOW(), NULL),
+(1, 'Bicicleta de Montaña', 'Bicicleta Trek, poco uso, incluye casco', 3, 2, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), NULL, NOW(), NULL),
+(1, 'Libro de Programación Java', 'Libro en buen estado, ideal para principiantes', 4, 3, 1, 1, 35000, (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 2 (Bogotá)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(2, 'iPhone 13 Pro', 'iPhone en perfecto estado, 128GB, con caja', 1, 1, 1, 1, 2800000, (SELECT id FROM ciudades WHERE nombre = 'Bogotá' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bogotá D.C.' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(2, 'Taladro Eléctrico', 'Taladro Black & Decker, incluye brocas', 5, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Bogotá' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bogotá D.C.' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(2, 'iPhone 13 Pro', 'iPhone en perfecto estado, 128GB, con caja', 1, 1, 1, 1, 2800000, (SELECT id FROM ciudades WHERE nombre = 'Bogotá' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bogotá D.C.' LIMIT 1), NULL, NOW(), NULL),
+(2, 'Taladro Eléctrico', 'Taladro Black & Decker, incluye brocas', 5, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Bogotá' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bogotá D.C.' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 3 (Cali)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(3, 'Smart TV Samsung 55"', 'Televisor 4K, poco uso, como nuevo', 1, 2, 1, 1, 1500000, (SELECT id FROM ciudades WHERE nombre = 'Cali' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Valle del Cauca' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(3, 'Juego de Sala', 'Sofá de 3 puestos + 2 poltronas, buen estado', 2, 3, 1, 1, 800000, (SELECT id FROM ciudades WHERE nombre = 'Cali' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Valle del Cauca' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(3, 'Smart TV Samsung 55"', 'Televisor 4K, poco uso, como nuevo', 1, 2, 1, 1, 1500000, (SELECT id FROM ciudades WHERE nombre = 'Cali' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Valle del Cauca' LIMIT 1), NULL, NOW(), NULL),
+(3, 'Juego de Sala', 'Sofá de 3 puestos + 2 poltronas, buen estado', 2, 3, 1, 1, 800000, (SELECT id FROM ciudades WHERE nombre = 'Cali' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Valle del Cauca' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 4 (Barranquilla)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(4, 'PlayStation 5', 'PS5 con 2 controles y 3 juegos', 9, 2, 1, 1, 2200000, (SELECT id FROM ciudades WHERE nombre = 'Barranquilla' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Atlántico' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(4, 'Guitarra Acústica', 'Guitarra Yamaha, ideal para principiantes', 7, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Barranquilla' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Atlántico' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(4, 'PlayStation 5', 'PS5 con 2 controles y 3 juegos', 9, 2, 1, 1, 2200000, (SELECT id FROM ciudades WHERE nombre = 'Barranquilla' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Atlántico' LIMIT 1), NULL, NOW(), NULL),
+(4, 'Guitarra Acústica', 'Guitarra Yamaha, ideal para principiantes', 7, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Barranquilla' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Atlántico' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 5 (Bucaramanga)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(5, 'Cámara Canon EOS', 'Cámara réflex con lente 18-55mm', 1, 2, 1, 1, 1800000, (SELECT id FROM ciudades WHERE nombre = 'Bucaramanga' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Santander' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(5, 'Patineta Eléctrica', 'Patineta con batería de larga duración', 3, 2, 1, 1, 650000, (SELECT id FROM ciudades WHERE nombre = 'Bucaramanga' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Santander' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(5, 'Cámara Canon EOS', 'Cámara réflex con lente 18-55mm', 1, 2, 1, 1, 1800000, (SELECT id FROM ciudades WHERE nombre = 'Bucaramanga' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Santander' LIMIT 1), NULL, NOW(), NULL),
+(5, 'Patineta Eléctrica', 'Patineta con batería de larga duración', 3, 2, 1, 1, 650000, (SELECT id FROM ciudades WHERE nombre = 'Bucaramanga' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Santander' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 6 (Cartagena)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(6, 'Tablet iPad Air', 'iPad Air 64GB, con Apple Pencil', 1, 2, 1, 1, 1400000, (SELECT id FROM ciudades WHERE nombre = 'Cartagena' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bolívar' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(6, 'Enciclopedia Completa', 'Colección de 20 tomos, excelente estado', 4, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Cartagena' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bolívar' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(6, 'Tablet iPad Air', 'iPad Air 64GB, con Apple Pencil', 1, 2, 1, 1, 1400000, (SELECT id FROM ciudades WHERE nombre = 'Cartagena' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bolívar' LIMIT 1), NULL, NOW(), NULL),
+(6, 'Enciclopedia Completa', 'Colección de 20 tomos, excelente estado', 4, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Cartagena' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Bolívar' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 7 (Envigado)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(7, 'Zapatillas Nike Air Max', 'Talla 42, nuevas sin usar', 8, 1, 1, 1, 320000, (SELECT id FROM ciudades WHERE nombre = 'Envigado' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(7, 'Mochila de Camping', 'Mochila 60L, ideal para trekking', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Envigado' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(7, 'Zapatillas Nike Air Max', 'Talla 42, nuevas sin usar', 8, 1, 1, 1, 320000, (SELECT id FROM ciudades WHERE nombre = 'Envigado' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), NULL, NOW(), NULL),
+(7, 'Mochila de Camping', 'Mochila 60L, ideal para trekking', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Envigado' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 8 (Pereira)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(8, 'Microondas Samsung', 'Microondas 1.1 pies cúbicos, poco uso', 2, 2, 1, 1, 280000, (SELECT id FROM ciudades WHERE nombre = 'Pereira' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Risaralda' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(8, 'Set de Herramientas', 'Caja con 120 piezas, marca Stanley', 5, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Pereira' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Risaralda' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(8, 'Microondas Samsung', 'Microondas 1.1 pies cúbicos, poco uso', 2, 2, 1, 1, 280000, (SELECT id FROM ciudades WHERE nombre = 'Pereira' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Risaralda' LIMIT 1), NULL, NOW(), NULL),
+(8, 'Set de Herramientas', 'Caja con 120 piezas, marca Stanley', 5, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Pereira' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Risaralda' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 9 (Manizales)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(9, 'Cafetera Espresso', 'Cafetera italiana, acero inoxidable', 2, 2, 1, 1, 180000, (SELECT id FROM ciudades WHERE nombre = 'Manizales' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Caldas' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(9, 'Balón de Fútbol', 'Balón profesional Adidas', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Manizales' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Caldas' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(9, 'Cafetera Espresso', 'Cafetera italiana, acero inoxidable', 2, 2, 1, 1, 180000, (SELECT id FROM ciudades WHERE nombre = 'Manizales' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Caldas' LIMIT 1), NULL, NOW(), NULL),
+(9, 'Balón de Fútbol', 'Balón profesional Adidas', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Manizales' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Caldas' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 10 (Armenia)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(10, 'Auriculares Sony WH-1000XM4', 'Auriculares con cancelación de ruido', 1, 2, 1, 1, 850000, (SELECT id FROM ciudades WHERE nombre = 'Armenia' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Quindío' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(10, 'Plantas Ornamentales', 'Set de 5 plantas para interior', 6, 1, 1, 1, 120000, (SELECT id FROM ciudades WHERE nombre = 'Armenia' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Quindío' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(10, 'Auriculares Sony WH-1000XM4', 'Auriculares con cancelación de ruido', 1, 2, 1, 1, 850000, (SELECT id FROM ciudades WHERE nombre = 'Armenia' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Quindío' LIMIT 1), NULL, NOW(), NULL),
+(10, 'Plantas Ornamentales', 'Set de 5 plantas para interior', 6, 1, 1, 1, 120000, (SELECT id FROM ciudades WHERE nombre = 'Armenia' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Quindío' LIMIT 1), NULL, NOW(), NULL);
 
 -- Artículos del Usuario 11 (Neiva)
 INSERT INTO articulos (usuario_id, titulo, descripcion, categoria_codigo, condicion_codigo, estado_articulo_codigo, tipo_transaccion_codigo, precio, ciudad_id, departamento_id, imagenes, creado_en, eliminado_en) VALUES
-(11, 'Drone DJI Mini 2', 'Drone con cámara 4K, poco uso', 1, 2, 1, 1, 1600000, (SELECT id FROM ciudades WHERE nombre = 'Neiva' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Huila' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL),
-(11, 'Raquetas de Tenis', 'Par de raquetas Wilson con estuche', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Neiva' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Huila' LIMIT 1), '["https://res.cloudinary.com/demo/image/upload/sample.jpg"]', NOW(), NULL);
+(11, 'Drone DJI Mini 2', 'Drone con cámara 4K, poco uso', 1, 2, 1, 1, 1600000, (SELECT id FROM ciudades WHERE nombre = 'Neiva' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Huila' LIMIT 1), NULL, NOW(), NULL),
+(11, 'Raquetas de Tenis', 'Par de raquetas Wilson con estuche', 3, 3, 1, 2, 0, (SELECT id FROM ciudades WHERE nombre = 'Neiva' LIMIT 1), (SELECT id FROM departamentos WHERE nombre = 'Huila' LIMIT 1), NULL, NOW(), NULL);
 
 
 -- ============================================
