@@ -117,11 +117,9 @@ INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 ('Inicio', 'inicio', 'lucideHome', 1, NOW(), TRUE),
 ('Explorar', 'explorar', 'lucideSearch', 2, NOW(), FALSE),
 ('Mis Artículos', 'mis-articulos', 'lucidePackage', 3, NOW(), FALSE),
-('Mis Gestiones', 'mis-gestiones', 'lucideClipboardList', 4, NOW(), FALSE),
-('Estadísticas', 'estadisticas', 'lucideBarChart3', 5, NOW(), FALSE),
-('Comercios', 'comercios', 'lucideStore', 6, NOW(), FALSE),
-('Análisis Predictivo', 'predictivo', 'lucideTrendingUp', 7, NOW(), FALSE),
-('ComuniBot', 'comunibot', 'lucideSparkles', 8, NOW(), FALSE);
+('Estadísticas', 'estadisticas', 'lucideBarChart3', 4, NOW(), FALSE),
+('Comercios', 'comercios', 'lucideStore', 5, NOW(), FALSE),
+('ComuniBot', 'comunibot', 'lucideSparkles', 6, NOW(), FALSE);
 
 -- Menús Admin
 INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
@@ -133,7 +131,7 @@ INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 -- Asignación de menús por rol
 -- USUARIO (rol_id=1) obtiene menús principales 1-8
 INSERT INTO rol_menus (rol_id, menu_id)
-SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'mis-gestiones', 'estadisticas', 'comercios', 'predictivo', 'comunibot');
+SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'estadisticas', 'comercios', 'comunibot');
 
 -- ADMIN (rol_id=2) obtiene menús admin
 INSERT INTO rol_menus (rol_id, menu_id)

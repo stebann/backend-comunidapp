@@ -43,6 +43,14 @@ public class Usuario {
     @Column(length = 1000)
     private String avatarUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ciudad_id")
+    private Ciudad ciudad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "departamento_id")
+    private Departamento departamento;
+
     @Column(nullable = false)
     private Float ratingPromedio = 5.0f;
 
