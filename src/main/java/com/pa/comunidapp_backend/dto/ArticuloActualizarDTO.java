@@ -21,23 +21,19 @@ public class ArticuloActualizarDTO {
     @Size(max = 1000, message = "La descripción no puede exceder 1000 caracteres")
     private String descripcion;
 
-        private Integer categoriaCodigo;
+    private Integer categoriaCodigo;
 
-        private Integer condicionCodigo;
+    private Integer condicionCodigo;
 
-        private Integer estadoArticuloCodigo;
+    private Integer estadoArticuloCodigo;
 
-        private Integer tipoTransaccionCodigo;
-
-     private Long departamentoCodigo;
-
-     private Long ciudadCodigo;
+    private Integer tipoTransaccionCodigo;
 
     @PositiveOrZero(message = "El precio debe ser mayor o igual a 0")
     private BigDecimal precio;
 
     private MultipartFile[] imagenes;
-    
+
     // URLs de las imágenes que ya existen y se deben mantener
     private String imagenesExistentes;
 

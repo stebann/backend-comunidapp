@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pa.comunidapp_backend.config.services.MapperService;
 import com.pa.comunidapp_backend.dto.ArticuloActualizarDTO;
 import com.pa.comunidapp_backend.dto.ArticuloCrearDTO;
 import com.pa.comunidapp_backend.enums.EEstadoArticulo;
@@ -68,16 +67,23 @@ public class ArticuloService {
         articulo.setCategoriaCodigo(articuloCrearDTO.getCategoriaCodigo());
         articulo.setCondicionCodigo(articuloCrearDTO.getCondicionCodigo());
         articulo.setTipoTransaccionCodigo(articuloCrearDTO.getTipoTransaccionCodigo());
-        articulo.setDepartamentoId(articuloCrearDTO.getDepartamentoCodigo());
-        articulo.setCiudadId(articuloCrearDTO.getCiudadCodigo());
         articulo.setPrecio(articuloCrearDTO.getPrecio());
         articulo.setUsuarioId(usuarioId);
         articulo.setCreadoEn(LocalDateTime.now());
         // artículo como "Disponible"
         articulo.setEstadoArticuloCodigo(EEstadoArticulo.Disponible.getCodigo());
 
-        // Guardar propietario en JSON
+        // Obtener ciudad y departamento del usuario logueado
         usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
+            // Asignar ciudad y departamento del usuario al artículo
+            if (usuario.getCiudad() != null) {
+                articulo.setCiudadId(usuario.getCiudad().getId());
+            }
+            if (usuario.getDepartamento() != null) {
+                articulo.setDepartamentoId(usuario.getDepartamento().getId());
+            }
+
+            // Guardar propietario en JSON
             try {
                 UsuarioBasicoDTO propietarioDTO = new UsuarioBasicoDTO();
                 propietarioDTO.setId(usuario.getId());
@@ -294,10 +300,6 @@ public class ArticuloService {
             articulo.setEstadoArticuloCodigo(articuloActualizarDTO.getEstadoArticuloCodigo());
         if (articuloActualizarDTO.getTipoTransaccionCodigo() != null)
             articulo.setTipoTransaccionCodigo(articuloActualizarDTO.getTipoTransaccionCodigo());
-        if (articuloActualizarDTO.getDepartamentoCodigo() != null)
-            articulo.setDepartamentoId(articuloActualizarDTO.getDepartamentoCodigo());
-        if (articuloActualizarDTO.getCiudadCodigo() != null)
-            articulo.setCiudadId(articuloActualizarDTO.getCiudadCodigo());
         if (articuloActualizarDTO.getPrecio() != null)
             articulo.setPrecio(articuloActualizarDTO.getPrecio());
 

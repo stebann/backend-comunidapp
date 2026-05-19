@@ -33,10 +33,6 @@ public class ArticuloCrearDTO {
     @NotNull(message = "El código de tipo de transacción es obligatorio")
     private Integer tipoTransaccionCodigo;
 
-    private Long departamentoCodigo;
-
-    private Long ciudadCodigo;
-
     @PositiveOrZero(message = "El precio debe ser mayor o igual a 0")
     private BigDecimal precio;
 
