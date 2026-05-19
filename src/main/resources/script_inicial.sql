@@ -24,7 +24,14 @@ INSERT INTO departamentos (nombre, creado_en, eliminado_en) VALUES
 ('Risaralda', NOW(), NULL),
 ('Quindío', NOW(), NULL),
 ('Huila', NOW(), NULL),
-('Magdalena', NOW(), NULL);
+('Magdalena', NOW(), NULL),
+('Cundinamarca', NOW(), NULL),
+('Norte de Santander', NOW(), NULL),
+('Tolima', NOW(), NULL),
+('Meta', NOW(), NULL),
+('Nariño', NOW(), NULL),
+('Córdoba', NOW(), NULL),
+('Cesar', NOW(), NULL);
 
 
 -- Ciudades
@@ -32,9 +39,11 @@ INSERT INTO ciudades (nombre, departamento_id, creado_en, eliminado_en) VALUES
 ('Medellín', 1, NOW(), NULL),
 ('Envigado', 1, NOW(), NULL),
 ('Itagüí', 1, NOW(), NULL),
+('Bello', 1, NOW(), NULL),
 ('Bogotá', 2, NOW(), NULL),
 ('Cali', 3, NOW(), NULL),
 ('Palmira', 3, NOW(), NULL),
+('Buenaventura', 3, NOW(), NULL),
 ('Barranquilla', 4, NOW(), NULL),
 ('Soledad', 4, NOW(), NULL),
 ('Bucaramanga', 5, NOW(), NULL),
@@ -44,7 +53,15 @@ INSERT INTO ciudades (nombre, departamento_id, creado_en, eliminado_en) VALUES
 ('Pereira', 8, NOW(), NULL),
 ('Armenia', 9, NOW(), NULL),
 ('Neiva', 10, NOW(), NULL),
-('Santa Marta', 11, NOW(), NULL);
+('Santa Marta', 11, NOW(), NULL),
+('Soacha', 12, NOW(), NULL),
+('Chía', 12, NOW(), NULL),
+('Cúcuta', 13, NOW(), NULL),
+('Ibagué', 14, NOW(), NULL),
+('Villavicencio', 15, NOW(), NULL),
+('Pasto', 16, NOW(), NULL),
+('Montería', 17, NOW(), NULL),
+('Valledupar', 18, NOW(), NULL);
 
 
 -- Categorías de Comercios (codigo fijo: 1-8)
