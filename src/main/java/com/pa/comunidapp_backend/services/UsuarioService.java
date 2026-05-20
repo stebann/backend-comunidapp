@@ -12,6 +12,10 @@ import com.pa.comunidapp_backend.config.services.MapperService;
 import com.pa.comunidapp_backend.dto.CambiarPasswordDTO;
 import com.pa.comunidapp_backend.dto.UsuarioActualizarDTO;
 import com.pa.comunidapp_backend.models.Usuario;
+import com.pa.comunidapp_backend.repositories.CiudadRepository;
+import com.pa.comunidapp_backend.repositories.DepartamentoRepository;
+import com.pa.comunidapp_backend.repositories.EstadoCivilRepository;
+import com.pa.comunidapp_backend.repositories.GeneroRepository;
 import com.pa.comunidapp_backend.repositories.UsuarioRepository;
 
 @Service
@@ -19,6 +23,18 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CiudadRepository ciudadRepository;
+
+    @Autowired
+    private DepartamentoRepository departamentoRepository;
+
+    @Autowired
+    private GeneroRepository generoRepository;
+
+    @Autowired
+    private EstadoCivilRepository estadoCivilRepository;
 
     @Autowired
     private MapperService mapperService;
@@ -53,6 +69,18 @@ public class UsuarioService {
         }
         if (usuarioActualizarDTO.getTelefono() != null) {
             usuario.setTelefono(usuarioActualizarDTO.getTelefono());
+        }
+        if (usuarioActualizarDTO.getGeneroId() != null) {
+            usuario.setGenero(generoRepository.findById(usuarioActualizarDTO.getGeneroId()).orElse(null));
+        }
+        if (usuarioActualizarDTO.getEstadoCivilId() != null) {
+            usuario.setEstadoCivil(estadoCivilRepository.findById(usuarioActualizarDTO.getEstadoCivilId()).orElse(null));
+        }
+        if (usuarioActualizarDTO.getCiudadId() != null) {
+            usuario.setCiudad(ciudadRepository.findById(usuarioActualizarDTO.getCiudadId()).orElse(null));
+        }
+        if (usuarioActualizarDTO.getDepartamentoId() != null) {
+            usuario.setDepartamento(departamentoRepository.findById(usuarioActualizarDTO.getDepartamentoId()).orElse(null));
         }
 
         usuario.setActualizadoEn(LocalDateTime.now());

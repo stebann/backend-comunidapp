@@ -12,4 +12,8 @@ public class UsuarioActualizarDTO {
     private String email;
     private String direccion;
     private String telefono;
+    private Long generoId;
+    private Long estadoCivilId;
+    private Long ciudadId;
+    private Long departamentoId;
 }

@@ -15,6 +15,8 @@ import com.pa.comunidapp_backend.models.CiudadFiltro;
 import com.pa.comunidapp_backend.models.CondicionesFiltro;
 import com.pa.comunidapp_backend.models.Departamento;
 import com.pa.comunidapp_backend.models.DepartamentoFiltro;
+import com.pa.comunidapp_backend.models.EstadoCivilFiltro;
+import com.pa.comunidapp_backend.models.GeneroFiltro;
 import com.pa.comunidapp_backend.models.RolFiltro;
 import com.pa.comunidapp_backend.models.TipoFiltro;
 import com.pa.comunidapp_backend.models.TipoTransaccion;
@@ -24,6 +26,8 @@ import com.pa.comunidapp_backend.repositories.CiudadRepository;
 import com.pa.comunidapp_backend.repositories.CondicionArticuloRepository;
 import com.pa.comunidapp_backend.repositories.DepartamentoRepository;
 import com.pa.comunidapp_backend.repositories.EstadoArticuloRepository;
+import com.pa.comunidapp_backend.repositories.EstadoCivilRepository;
+import com.pa.comunidapp_backend.repositories.GeneroRepository;
 import com.pa.comunidapp_backend.repositories.RolRepository;
 import com.pa.comunidapp_backend.repositories.TipoTransaccionRepository;
 import com.pa.comunidapp_backend.response.ArticuloResponseDTO;
@@ -55,6 +59,12 @@ public class FiltroService {
     @Autowired
     private CiudadRepository ciudadRepository;
 
+    @Autowired
+    private GeneroRepository generoRepository;
+
+    @Autowired
+    private EstadoCivilRepository estadoCivilRepository;
+
     public List<RolFiltro> obtenerRoles() {
         return rolRepository.findAll().stream()
             .map(rol -> new RolFiltro(rol.getCodigo(), rol.getNombre()))
@@ -76,6 +86,20 @@ public class FiltroService {
     public List<CiudadFiltro> obtenerTodasLasCiudades() {
         return ciudadRepository.findByEliminadoEnIsNull().stream()
             .map(ciu -> new CiudadFiltro(ciu.getId().intValue(), ciu.getNombre()))
+            .collect(Collectors.toList());
+    }
+
+    public List<GeneroFiltro> obtenerGeneros() {
+        return generoRepository.findAll().stream()
+            .filter(g -> g.getEliminadoEn() == null)
+            .map(g -> new GeneroFiltro(g.getId().intValue(), g.getNombre()))
+            .collect(Collectors.toList());
+    }
+
+    public List<EstadoCivilFiltro> obtenerEstadosCiviles() {
+        return estadoCivilRepository.findAll().stream()
+            .filter(ec -> ec.getEliminadoEn() == null)
+            .map(ec -> new EstadoCivilFiltro(ec.getId().intValue(), ec.getNombre()))
             .collect(Collectors.toList());
     }
 

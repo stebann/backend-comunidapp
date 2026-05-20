@@ -16,6 +16,8 @@ import com.pa.comunidapp_backend.models.CategoriaFiltro;
 import com.pa.comunidapp_backend.models.CiudadFiltro;
 import com.pa.comunidapp_backend.models.CondicionesFiltro;
 import com.pa.comunidapp_backend.models.DepartamentoFiltro;
+import com.pa.comunidapp_backend.models.EstadoCivilFiltro;
+import com.pa.comunidapp_backend.models.GeneroFiltro;
 import com.pa.comunidapp_backend.models.RolFiltro;
 import com.pa.comunidapp_backend.models.TipoFiltro;
 import com.pa.comunidapp_backend.response.ArticuloResponseDTO;
@@ -61,6 +63,18 @@ public class FiltroController {
     public ResponseEntity<List<RolFiltro>> obtenerRoles() {
         List<RolFiltro> roles = filtroService.obtenerRoles();
         return ResponseEntity.ok(roles);
+    }
+
+    @GetMapping("/generos")
+    public ResponseEntity<List<GeneroFiltro>> obtenerGeneros() {
+        List<GeneroFiltro> generos = filtroService.obtenerGeneros();
+        return ResponseEntity.ok(generos);
+    }
+
+    @GetMapping("/estados-civiles")
+    public ResponseEntity<List<EstadoCivilFiltro>> obtenerEstadosCiviles() {
+        List<EstadoCivilFiltro> estadosCiviles = filtroService.obtenerEstadosCiviles();
+        return ResponseEntity.ok(estadosCiviles);
     }
 
     @GetMapping("/departamentos")

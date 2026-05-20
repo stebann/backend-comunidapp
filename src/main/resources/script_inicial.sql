@@ -129,30 +129,46 @@ INSERT INTO roles (codigo, nombre, descripcion, created_at) VALUES
 (3, 'admin-lider', 'Líder administrador', NOW());
 
 
+-- Géneros
+INSERT INTO generos (nombre, creado_en) VALUES
+('Masculino', NOW()),
+('Femenino', NOW()),
+('Prefiero no decirlo', NOW());
+
+
+-- Estados Civiles
+INSERT INTO estados_civiles (nombre, creado_en) VALUES
+('Soltero/a', NOW()),
+('Casado/a', NOW()),
+('Unión Libre', NOW()),
+('Divorciado/a', NOW()),
+('Viudo/a', NOW());
+
+
 -- Menús Usuario
 INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 ('Inicio', 'inicio', 'lucideHome', 1, NOW(), TRUE),
 ('Explorar', 'explorar', 'lucideSearch', 2, NOW(), FALSE),
 ('Mis Artículos', 'mis-articulos', 'lucidePackage', 3, NOW(), FALSE),
-('Estadísticas', 'estadisticas', 'lucideBarChart3', 4, NOW(), FALSE),
-('Comercios', 'comercios', 'lucideStore', 5, NOW(), FALSE),
-('ComuniBot', 'comunibot', 'lucideSparkles', 6, NOW(), FALSE);
+('Comercios', 'comercios', 'lucideStore', 4, NOW(), FALSE),
+('ComuniBot', 'comunibot', 'lucideSparkles', 5, NOW(), FALSE);
 
 -- Menús Admin
 INSERT INTO menus (nombre, ruta, icono, orden, created_at, por_defecto) VALUES
 ('Inicio', 'admin-inicio', 'lucideHome', 1, NOW(), TRUE),
 ('Artículos', 'articulos', 'lucidePackage', 2, NOW(), FALSE),
 ('Usuarios', 'usuarios', 'lucideUsers', 3, NOW(), FALSE),
-('Gestión Premium', 'gestion-premium', 'lucideCrown', 4, NOW(), FALSE);
+('Estadísticas', 'admin-estadisticas', 'lucideBarChart3', 4, NOW(), FALSE),
+('Gestión Premium', 'gestion-premium', 'lucideCrown', 5, NOW(), FALSE);
 
 -- Asignación de menús por rol
--- USUARIO (rol_id=1) obtiene menús principales 1-8
+-- USUARIO (rol_id=1) obtiene menús principales
 INSERT INTO rol_menus (rol_id, menu_id)
-SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'estadisticas', 'comercios', 'comunibot');
+SELECT 1, id FROM menus WHERE ruta IN ('inicio', 'explorar', 'mis-articulos', 'comercios', 'comunibot');
 
 -- ADMIN (rol_id=2) obtiene menús admin
 INSERT INTO rol_menus (rol_id, menu_id)
-SELECT 2, id FROM menus WHERE ruta IN ('admin-inicio', 'articulos', 'usuarios', 'gestion-premium');
+SELECT 2, id FROM menus WHERE ruta IN ('admin-inicio', 'articulos', 'usuarios', 'admin-estadisticas', 'gestion-premium');
 
 
 -- -- Asignar rol ADMIN (rol_id=2) a un usuario por su ID

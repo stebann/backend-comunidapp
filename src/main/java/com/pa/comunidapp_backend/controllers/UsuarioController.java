@@ -51,6 +51,14 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/actualizar-perfil/{id}")
+    public ResponseEntity<Void> actualizarPerfil(
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioActualizarDTO usuarioActualizarDTO) {
+        usuarioService.actualizarDatosPersonales(id, usuarioActualizarDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/cambiar-contrasena/{id}")
     public ResponseEntity<Void> cambiarPassword(
             @PathVariable Long id,

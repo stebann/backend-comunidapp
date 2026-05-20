@@ -1,7 +1,6 @@
 -- ============================================
 -- SCRIPT PARA RELLENAR LA BASE DE DATOS CON DATOS DE PRUEBA
 -- ============================================
--- Ejecutar después de tener usuarios con direcciones corregidas
 
 -- ============================================
 -- COMERCIOS
@@ -9,7 +8,7 @@
 
 -- Comercio 1: Tienda de Electrónica (Usuario 1 - Medellín)
 INSERT INTO comercios (usuario_id, categoria_id, nombre, descripcion, telefono, direccion, ciudad_id, departamento_id, tiene_envio, rating_promedio, activo, creado_en, eliminado_en) VALUES
-(1, 3, 'TechStore Medellín', 'Venta y reparación de equipos electrónicos', '3001234567', 'Calle 10 #45-70, El Poblado', 
+(1, 3, 'TechStore Medellín', 'Venta y reparación de equipos electrónicos', '3001234567', 'Calle 10 #45-70, El Poblado',
  (SELECT id FROM ciudades WHERE nombre = 'Medellín' LIMIT 1),
  (SELECT id FROM departamentos WHERE nombre = 'Antioquia' LIMIT 1),
  true, 4.5, true, NOW(), NULL);

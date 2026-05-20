@@ -2,6 +2,8 @@ package com.pa.comunidapp_backend.models;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,18 +38,28 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String contrasena;
 
     private String telefono;
     private String direccion;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "genero_id")
+    private Genero genero;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "estado_civil_id")
+    private EstadoCivil estadoCivil;
+
     @Column(length = 1000)
     private String avatarUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ciudad_id")
     private Ciudad ciudad;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "departamento_id")
     private Departamento departamento;
 
