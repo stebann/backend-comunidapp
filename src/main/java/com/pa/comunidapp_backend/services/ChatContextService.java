@@ -6,11 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.pa.comunidapp_backend.enums.EArticuloCondicion;
 import com.pa.comunidapp_backend.enums.EEstadoArticulo;
 import com.pa.comunidapp_backend.enums.EEstadoSolicitud;
 import com.pa.comunidapp_backend.enums.ETipoSolicitud;
+import com.pa.comunidapp_backend.enums.ETipoTransaccion;
 import com.pa.comunidapp_backend.models.Articulo;
 import com.pa.comunidapp_backend.repositories.ArticuloRepository;
+import com.pa.comunidapp_backend.repositories.CategoriaRepository;
 import com.pa.comunidapp_backend.repositories.MisGestionesRepository;
 import com.pa.comunidapp_backend.repositories.UsuarioRepository;
 
@@ -25,6 +28,9 @@ public class ChatContextService {
 
         @Autowired
         private MisGestionesRepository misGestionesRepository;
+
+        @Autowired
+        private CategoriaRepository categoriaRepository;
 
         /**
          * Obtiene el contexto del usuario para el chat
@@ -56,6 +62,64 @@ public class ChatContextService {
                 contexto.append("Total publicados: ").append(articulosPublicados).append("\n");
                 contexto.append("Disponibles: ").append(articulosDisponibles).append("\n");
                 contexto.append("Prestados: ").append(articulosPrestados).append("\n");
+
+                // Desglose por condición
+                contexto.append("\n--- ARTÍCULOS POR CONDICIÓN ---\n");
+                long articulosNuevos = articuloRepository
+                                .countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, EArticuloCondicion.Nuevo.getCodigo());
+                long articulosPocoUso = articuloRepository
+                                .countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, EArticuloCondicion.PocoUso.getCodigo());
+                long articulosUsados = articuloRepository
+                                .countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, EArticuloCondicion.Usado.getCodigo());
+                long articulosDañados = articuloRepository
+                                .countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, EArticuloCondicion.Dañado.getCodigo());
+                long articulosDefectuosos = articuloRepository
+                                .countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, EArticuloCondicion.Defectuoso.getCodigo());
+
+                contexto.append("Nuevos: ").append(articulosNuevos).append("\n");
+                contexto.append("Poco uso: ").append(articulosPocoUso).append("\n");
+                contexto.append("Usados: ").append(articulosUsados).append("\n");
+                contexto.append("Dañados: ").append(articulosDañados).append("\n");
+                contexto.append("Defectuosos: ").append(articulosDefectuosos).append("\n");
+
+                // Desglose por tipo de transacción
+                contexto.append("\n--- ARTÍCULOS POR TIPO DE TRANSACCIÓN ---\n");
+                long articulosVenta = articuloRepository
+                                .countByUsuarioIdAndTipoTransaccionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, ETipoTransaccion.Venta.getCodigo());
+                long articulosPrestamo = articuloRepository
+                                .countByUsuarioIdAndTipoTransaccionCodigoAndEliminadoEnIsNull(
+                                                usuarioId, ETipoTransaccion.Prestamo.getCodigo());
+
+                contexto.append("Para venta: ").append(articulosVenta).append("\n");
+                contexto.append("Para préstamo: ").append(articulosPrestamo).append("\n");
+
+                // Desglose por categoría (top 5)
+                contexto.append("\n--- ARTÍCULOS POR CATEGORÍA ---\n");
+                List<Articulo> todosArticulos = articuloRepository.findByUsuarioIdAndEliminadoEnIsNull(usuarioId);
+
+                // Agrupar por categoría y contar
+                var categoriaCount = todosArticulos.stream()
+                                .filter(a -> a.getCategoriaCodigo() != null)
+                                .collect(Collectors.groupingBy(
+                                                Articulo::getCategoriaCodigo,
+                                                Collectors.counting()));
+
+                // Mostrar las categorías con sus nombres
+                categoriaCount.forEach((categoriaCodigo, count) -> {
+                        categoriaRepository.findByCodigo(Long.valueOf(categoriaCodigo)).ifPresent(categoria -> {
+                                contexto.append(categoria.getNombre()).append(": ").append(count).append("\n");
+                        });
+                });
+
+                if (categoriaCount.isEmpty()) {
+                        contexto.append("No hay artículos categorizados\n");
+                }
 
                 // Estadísticas de solicitudes
                 long solicitudesPendientes = misGestionesRepository
@@ -130,7 +194,19 @@ public class ChatContextService {
                                 "cuántos", "cuantos", "mis artículos", "mi rating", "mis solicitudes",
                                 "mis préstamos", "mis gestiones", "tengo", "he publicado",
                                 "artículos disponibles", "qué artículos", "que articulos",
-                                "muéstrame", "muestrame", "lista", "ver"
+                                "muéstrame", "muestrame", "lista", "ver",
+                                // Palabras relacionadas con condición
+                                "nuevos", "nuevo", "usados", "usado", "poco uso", "dañados", "dañado",
+                                "defectuosos", "defectuoso", "condición", "condicion", "estado",
+                                // Palabras relacionadas con tipo de transacción
+                                "venta", "ventas", "préstamo", "prestamo", "préstamos", "prestamos",
+                                "vender", "prestar",
+                                // Palabras relacionadas con categorías
+                                "categoría", "categoria", "categorías", "categorias",
+                                "electrónica", "electronica", "hogar", "deportes", "libros",
+                                "herramientas", "jardín", "jardin", "música", "musica", "ropa", "juegos",
+                                // Palabras relacionadas con estadísticas personales
+                                "mi perfil", "mi información", "mi cuenta", "mis datos"
                 };
 
                 for (String palabra : palabrasClave) {

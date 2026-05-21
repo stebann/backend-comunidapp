@@ -76,6 +76,7 @@ public class ComercioService {
     private ComercioResumenDTO mapToComercioResumenDTO(Comercio comercio) {
         ComercioResumenDTO dto = new ComercioResumenDTO();
         dto.setId(comercio.getId());
+        dto.setUsuarioId(comercio.getUsuario().getId());
         dto.setNombre(comercio.getNombre());
         dto.setDescripcion(comercio.getDescripcion());
         dto.setDireccion(comercio.getDireccion());
@@ -87,17 +88,17 @@ public class ComercioService {
         dto.setCategoriaNombre(comercio.getCategoria() != null ? comercio.getCategoria().getNombre() : null);
 
         // Mapear ubicación
-         dto.setDepartamentoCodigo(comercio.getDepartamentoId());
-         if (comercio.getDepartamentoId() != null) {
-             departamentoRepository.findById(comercio.getDepartamentoId())
-                     .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
-         }
+        dto.setDepartamentoCodigo(comercio.getDepartamentoId());
+        if (comercio.getDepartamentoId() != null) {
+            departamentoRepository.findById(comercio.getDepartamentoId())
+                    .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
+        }
 
-         dto.setCiudadCodigo(comercio.getCiudadId());
-         if (comercio.getCiudadId() != null) {
-             ciudadRepository.findById(comercio.getCiudadId())
-                     .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
-         }
+        dto.setCiudadCodigo(comercio.getCiudadId());
+        if (comercio.getCiudadId() != null) {
+            ciudadRepository.findById(comercio.getCiudadId())
+                    .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
+        }
 
         return dto;
     }
@@ -249,6 +250,7 @@ public class ComercioService {
         Comercio c = comercioOptional.get();
         ComercioDetalleDTO dto = new ComercioDetalleDTO();
         dto.setId(c.getId());
+        dto.setUsuarioId(c.getUsuario().getId());
         dto.setNombre(c.getNombre());
         dto.setDescripcion(c.getDescripcion());
         dto.setDireccion(c.getDireccion());
@@ -260,18 +262,18 @@ public class ComercioService {
         dto.setCategoriaId(c.getCategoria().getId());
         dto.setCategoriaNombre(c.getCategoria().getNombre());
 
-         // Mapear ubicación
-         dto.setDepartamentoCodigo(c.getDepartamentoId());
-         if (c.getDepartamentoId() != null) {
-             departamentoRepository.findById(c.getDepartamentoId())
-                     .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
-         }
+        // Mapear ubicación
+        dto.setDepartamentoCodigo(c.getDepartamentoId());
+        if (c.getDepartamentoId() != null) {
+            departamentoRepository.findById(c.getDepartamentoId())
+                    .ifPresent(dep -> dto.setDepartamento(dep.getNombre()));
+        }
 
-         dto.setCiudadCodigo(c.getCiudadId());
-         if (c.getCiudadId() != null) {
-             ciudadRepository.findById(c.getCiudadId())
-                     .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
-         }
+        dto.setCiudadCodigo(c.getCiudadId());
+        if (c.getCiudadId() != null) {
+            ciudadRepository.findById(c.getCiudadId())
+                    .ifPresent(ciu -> dto.setCiudad(ciu.getNombre()));
+        }
 
         dto.setCategorias(categoriaArticuloComercioService.obtenerCategoriasComercio(c.getId()));
         dto.setArticulos(articuloComercioService.obtenerArticulosComercio(c.getId()));

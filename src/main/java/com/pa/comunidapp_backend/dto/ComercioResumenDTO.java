@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ComercioResumenDTO {
     private Long id;
+    private Long usuarioId;
     private String nombre;
     private String descripcion;
     private String direccion;

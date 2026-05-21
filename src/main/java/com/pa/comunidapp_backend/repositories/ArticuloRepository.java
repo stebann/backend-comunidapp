@@ -101,6 +101,26 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
         // Contar artículos por usuario y estado
         long countByUsuarioIdAndEstadoArticuloCodigoAndEliminadoEnIsNull(Long usuarioId, Integer estadoArticuloCodigo);
 
+        // Contar artículos por usuario y condición
+        long countByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(Long usuarioId, Integer condicionCodigo);
+
+        // Contar artículos por usuario y categoría
+        long countByUsuarioIdAndCategoriaCodigoAndEliminadoEnIsNull(Long usuarioId, Integer categoriaCodigo);
+
+        // Contar artículos por usuario y tipo de transacción
+        long countByUsuarioIdAndTipoTransaccionCodigoAndEliminadoEnIsNull(Long usuarioId,
+                        Integer tipoTransaccionCodigo);
+
         // Buscar artículos por estado
         List<Articulo> findByEstadoArticuloCodigoAndEliminadoEnIsNull(Integer estadoArticuloCodigo);
+
+        // Buscar artículos por usuario y condición
+        List<Articulo> findByUsuarioIdAndCondicionCodigoAndEliminadoEnIsNull(Long usuarioId, Integer condicionCodigo);
+
+        // Buscar artículos por usuario y categoría
+        List<Articulo> findByUsuarioIdAndCategoriaCodigoAndEliminadoEnIsNull(Long usuarioId, Integer categoriaCodigo);
+
+        // Buscar artículos por usuario y tipo de transacción
+        List<Articulo> findByUsuarioIdAndTipoTransaccionCodigoAndEliminadoEnIsNull(Long usuarioId,
+                        Integer tipoTransaccionCodigo);
 }
